@@ -1,0 +1,99 @@
+.projects-container {
+  background-color: #2c2c2c;
+  color: #fff;
+  padding: 2rem;
+  max-width: 600px;
+  margin: 3rem auto;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 1.5s ease-out;
+  position: relative;
+  padding: 20px;
+  }
+  
+  .project-container h2{
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #00d4ff;
+    animation: slideInDown 1.2s ease-out;
+  }
+  
+  .add-project-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 0.5px;
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #28a745;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    width: 50%; 
+    margin-bottom: 20px;
+  }
+  
+  input[type="text"],
+  textarea {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 100%; 
+  }
+  
+  input[type="file"] {
+    margin-bottom: 10px;
+  }
+  
+  button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    align-self: center; 
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  ul {
+    list-style-type: none;
+    padding: 0;
+    width: 60%; 
+  }
+  
+  li {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+  }
+  
+  li strong {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  img, video {
+    margin-top: 10px;
+    border-radius: 5px;
+    max-width: 100%; 
+  }
+  
+  a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  button {
+    margin-right: 10px;
+  }
+  
