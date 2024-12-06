@@ -1,7 +1,9 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth.models import User
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
@@ -38,7 +40,7 @@ class ProfileView(APIView):
 
         try:
             profile = Profile.objects.get(user__username=username)
-            serializer = ProfileSerializer(profile)
+            serializer = ProfileSerializer(profile, context={"request": request})
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Profile.DoesNotExist:
             return Response({"error": "Profile does not exist"}, status=status.HTTP_404_NOT_FOUND)
@@ -46,11 +48,12 @@ class ProfileView(APIView):
     def post(self, request, *args, **kwargs):
         """Create or update the profile for the authenticated user."""
         user = request.data.get("username")
-        user_instance = User.objects.filter(username=user).first()  # Get the User instance
+        user_instance = User.objects.filter(username=user).first()
 
         if not user_instance:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
+        # Getting the rest of the data
         name = request.data.get('name')
         domain = request.data.get('domain')
         linkedin_url = request.data.get('linkedin_url')
@@ -58,7 +61,7 @@ class ProfileView(APIView):
         mail_id = request.data.get('mail_id')
         phone_no = request.data.get('phone_no')
         about = request.data.get('about')
-        profile_photo = request.data.get('profile_photo')
+        profile_photo = request.FILES.get('profile_photo')  # Get the profile photo from request.FILES
 
         # Validate LinkedIn and GitHub URLs if provided
         if linkedin_url and not self.validate_url(linkedin_url):
@@ -68,7 +71,7 @@ class ProfileView(APIView):
 
         # Create or update the profile
         profile, created = Profile.objects.update_or_create(
-            user=user_instance,  # Pass the user instance
+            user=user_instance,
             defaults={
                 'name': name,
                 'domain': domain,
@@ -78,10 +81,219 @@ class ProfileView(APIView):
                 'phone_no': phone_no,
                 'about': about,
                 'profile_photo': profile_photo
-                
             }
         )
 
         # Serialize and return the created or updated profile
-        serializer = ProfileSerializer(profile)
+        serializer = ProfileSerializer(profile, context={"request": request})
         return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+# Attendance View 
+class AttendanceView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        username = request.data.get("username")
+        if not username:
+            return Response({"error": "Username is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_instance = User.objects.filter(username=username).first()
+        if not user_instance:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        latitude = request.data.get("latitude")
+        longitude = request.data.get("longitude")
+        # Check if latitude and longitude are provided
+        if latitude is None or longitude is None:
+            return Response({"error": "Latitude and Longitude are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create a new attendance record
+        attendance = Attendance.objects.create(
+            user=user_instance,
+            username=username,
+            latitude=latitude,
+            longitude=longitude,
+        )
+
+        serializer = AttendanceSerializer(attendance)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class WorkDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, pk):  # Change 'id' to 'pk'
+        try:
+            work_report = work.objects.get(id=pk)  # Use 'pk' to fetch the report
+            serializer = WorkSerializer(work_report, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except work.DoesNotExist:
+            return Response({"error": "Report not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    def delete(self, request, pk):  # Accept pk for DELETE method
+        try:
+            work_report = work.objects.get(id=pk)
+            work_report.delete()  # Delete the report
+            return Response({"message": "Report deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except work.DoesNotExist:
+            return Response({"error": "Report not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class Workview(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        username = request.data.get("username")
+        title = request.data.get("title")
+        description = request.data.get("description")
+        media = request.FILES.get("media")
+
+        if not username:
+            return Response({"error": "Username is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_instance = User.objects.filter(username=username).first()
+
+        if not user_instance:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Create the work report
+        try:
+            work_report = work.objects.create(
+                user=user_instance,
+                title=title,
+                description=description,
+                media=media,
+            )
+        except Exception as e:
+            return Response({"error": f"Failed to create work report: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Serialize and return the created work report
+        serializer = WorkSerializer(work_report, context={"request": request})
+        return Response(
+            {"message": "Work report created successfully", "data": serializer.data},
+            status=status.HTTP_201_CREATED,
+        )
+
+    def get(self, request):
+        # Fetch all reports for the authenticated user
+        reports = work.objects.filter(user=request.user).order_by("-id")
+        serializer = WorkSerializer(reports, many=True, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CourseDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, pk):
+        try:
+            course = Course.objects.get(id=pk)  # Use 'pk' to fetch the course
+            serializer = CourseSerializer(course, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Course.DoesNotExist:
+            return Response({"error": "Course not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    def delete(self, request, pk):  # Accept pk for DELETE method
+        try:
+            course = Course.objects.get(id=pk)
+            course.delete()  # Delete the course
+            return Response({"message": "Course deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Course.DoesNotExist:
+            return Response({"error": "Course not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class CourseView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        username = request.data.get("username")
+        course_name = request.data.get("course_name")  # Adjusted field name
+        platform = request.data.get("platform")
+        certificate = request.FILES.get("certificate")  # Ensure you're sending correct file key
+
+        if not username:
+            return Response({"error": "Username is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_instance = User.objects.filter(username=username).first()
+
+        if not user_instance:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            course = Course.objects.create(
+                user=user_instance,
+                username=username,
+                course_name=course_name,
+                platform=platform,
+                certificate=certificate,
+            )
+        except Exception as e:
+            return Response({"error": f"Failed to create course: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = CourseSerializer(course, context={"request": request})
+        return Response(
+            {"message": "Course created successfully", "data": serializer.data},
+            status=status.HTTP_201_CREATED,
+        )
+
+    def get(self, request):
+        courses = Course.objects.filter(user=request.user).order_by("-id")
+        serializer = CourseSerializer(courses, many=True, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+class ProjectDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, pk):  # Change 'id' to 'pk'
+        try:
+            Project_report = Project.objects.get(id=pk)  # Use 'pk' to fetch the report
+            serializer = ProjectSerializer(Project_report, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Project.DoesNotExist:
+            return Response({"error": "Report not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    def delete(self, request, pk):  # Accept pk for DELETE method
+        try:
+            Project_report = Project.objects.get(id=pk)
+            Project_report.delete()  # Delete the report
+            return Response({"message": "Report deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Project.DoesNotExist:
+            return Response({"error": "Report not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class ProjectView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        username = request.data.get("username")
+        project_title = request.data.get("title")
+        description = request.data.get("description")
+        proof = request.FILES.get("media")
+
+        if not username:
+            return Response({"error": "Username is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_instance = User.objects.filter(username=username).first()
+
+        if not user_instance:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Create the work report
+        try:
+            Project_report = Project.objects.create(
+                user=user_instance,
+                project_title=project_title,
+                description=description,
+                proof=proof,
+            )
+        except Exception as e:
+            return Response({"error": f"Failed to create work report: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Serialize and return the created work report
+        serializer = ProjectSerializer(Project_report, context={"request": request})
+        return Response(
+            {"message": "Work report created successfully", "data": serializer.data},
+            status=status.HTTP_201_CREATED,
+        )
+
+    def get(self, request):
+        # Fetch all reports for the authenticated user
+        reports = Project.objects.filter(user=request.user).order_by("-id")
+        serializer = ProjectSerializer(reports, many=True, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)

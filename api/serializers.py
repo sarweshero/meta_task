@@ -21,21 +21,67 @@ class UserSerializer(serializers.ModelSerializer):
 class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendance
-        fields = '__all__'
+        fields = ['latitude', 'longitude', 'user_id', 'time']
+        extra_kwargs = {
+            "time": {"read_only": True},
+        }
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = '__all__'
-        # You can add extra validations if needed, like checking file types or limits
+    def get_media(self, obj):
+        request = self.context.get('request')
+        if obj.media and request:
+            return request.build_absolute_uri(obj.media.url)
+        return None
+
+class WorkSerializer(serializers.ModelSerializer):
+    media = serializers.SerializerMethodField()
+
+    class Meta:
+        model = work
+        fields = ['id', 'title', 'description', 'media', 'created_at', 'username', 'user']
+
+    def get_media(self, obj):
+        request = self.context.get('request')
+        if obj.media and request:
+            return request.build_absolute_uri(obj.media.url)
+        return None
 
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = '__all__'
-        # You can add extra validations here for proof files (e.g., size, type, etc.)
+    def get_media(self, obj):
+        request = self.context.get('request')
+        if obj.media and request:
+            return request.build_absolute_uri(obj.media.url)
+        return None
 
 class ProfileSerializer(serializers.ModelSerializer):
+    media = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
-        fields = ['user', 'name', 'domain', 'linkedin_url', 'github_url', 'mail_id', 'phone_no', 'about' ,'profile_photo']
+        fields = ['user', 'name', 'domain', 'linkedin_url', 'github_url', 'mail_id', 'phone_no', 'about', 'user_id', 'profile_photo', 'media']
+
+    def get_media(self, obj):
+        request = self.context.get('request')
+        if obj.profile_photo and request:  # Using 'profile_photo' from the model
+            return request.build_absolute_uri(obj.profile_photo.url)
+        return None
+
+
+class WorkSerializer(serializers.ModelSerializer):
+    media = serializers.SerializerMethodField()
+
+    class Meta:
+        model = work
+        fields = ['id', 'title', 'description', 'media', 'created_at', 'username', 'user']
+
+    def get_media(self, obj):
+        request = self.context.get('request')
+        if obj.media and request:
+            return request.build_absolute_uri(obj.media.url)
+        return None

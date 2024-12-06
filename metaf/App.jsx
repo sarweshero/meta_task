@@ -6,9 +6,12 @@ import WorkReport from "./Components/WorkReport";
 import Courses from "./Components/Courses";
 import Projects from "./Components/Projects";
 import Profile from "./Components/Profile";
+import ProjectDetails from "./Components/Projects/ProjectDetails";
 import Login from "./Components/Home/Login/Login";
+import CourseDetails from "./Components/Courses/CourseDetails";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
+import ReportDetails from "./Components/WorkReport/ReportDetails";
 
 // Logout Functionality
 function Logout() {
@@ -53,6 +56,22 @@ function App() {
           }
         />
         <Route
+          path="/work-reports/:id"
+          element={
+            <ProtectedRoute>
+              <ReportDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/courses/:id"
+          element={
+            <ProtectedRoute>
+              <CourseDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/courses"
           element={
             <ProtectedRoute>
@@ -65,6 +84,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Projects />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/:id"
+          element={
+            <ProtectedRoute>
+              <ProjectDetails />
             </ProtectedRoute>
           }
         />
