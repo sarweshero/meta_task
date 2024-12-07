@@ -7,7 +7,7 @@ class Attendance(models.Model):
     username = models.CharField(max_length=100, null=True)
     latitude = models.CharField(max_length=100, null=True)
     longitude = models.CharField(max_length=100, null=True)
-    time = models.DateTimeField(auto_now_add=True, null=True)
+    time = models.DateTimeField(null=True)
 
 
 # Course Table

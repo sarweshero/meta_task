@@ -22,9 +22,6 @@ class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendance
         fields = ['latitude', 'longitude', 'user_id', 'time', 'username']
-        extra_kwargs = {
-            "time": {"read_only": True},
-        }
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,66 +1,90 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../../api"; // Import the configured api instance
 import "./Attendance.css";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../Navbar/index.jsx";
 
 const Attendance = () => {
-  const [dateTime, setDateTime] = useState("");
   const [location, setLocation] = useState({ latitude: "", longitude: "" });
   const [showDetails, setShowDetails] = useState(false);
   const [message, setMessage] = useState("");
+  const [dateTime, setDateTime] = useState("");  // State for storing the date-time
   const navigate = useNavigate();
 
-  // Get current date and time
+  // Get current date and time in the correct format (YYYY-MM-DD HH:MM:SS)
   const getCurrentDateTime = () => {
     const current = new Date();
-    const formattedDateTime = current.toLocaleString();
-    setDateTime(formattedDateTime);
+    
+    // Get the date-time in the correct local format (YYYY-MM-DD HH:MM:SS)
+    const options = {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false, // 24-hour format
+    };
+
+    // Get local date-time with 'toLocaleString()' with options
+    const formattedDateTime = current.toLocaleString('en-GB', options).replace(",", "").replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$2-$1");
+
+    return formattedDateTime;
   };
+
+  // Update dateTime every second
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setDateTime(getCurrentDateTime()); // Update the date-time state
+    }, 1000); // Update every second
+
+    // Clean up the interval when the component is unmounted
+    return () => clearInterval(intervalId);
+  }, []); // Empty dependency array means this effect runs only once when the component mounts
 
   // Get user's live location
   const fetchLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          setMessage("Failed to fetch location.");
-        }
-      );
-    } else {
-      setMessage("Geolocation is not supported by your browser.");
-    }
+    return new Promise((resolve, reject) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const locationData = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            };
+            setLocation(locationData);
+            resolve(locationData);
+          },
+          (error) => {
+            reject(error);
+          }
+        );
+      } else {
+        reject(new Error("Geolocation is not supported by your browser."));
+      }
+    });
   };
 
-  // Post attendance data to the backend
   const handleAttendanceClick = async () => {
-    getCurrentDateTime();
-    fetchLocation();
-  
-    // Wait for location to be updated before posting data
-    setTimeout(async () => {
-      try {
-        const attendanceData = {
-          username: localStorage.getItem("username"),
-          latitude: location.latitude,
-          longitude: location.longitude,
-        };
-  
-        const response = await api.post("attendance/", attendanceData);
-        setMessage("Attendance marked successfully!");
-        setShowDetails(true); // Show details when attendance is successfully marked
-        console.log("Response:", response.data);
-      } catch (error) {
-        console.error("Error posting attendance:", error.response?.data || error.message);
-        setMessage(error.response?.data?.error || "Failed to mark attendance.");
-      }
-    }, 1000);
+    try {
+      const locationData = await fetchLocation(); // Wait for location to resolve
+
+      const attendanceData = {
+        username: localStorage.getItem("username"),
+        latitude: locationData.latitude,
+        longitude: locationData.longitude,
+        time: dateTime,  // Use the current local date-time
+      };
+
+      // Post attendance data
+      const response = await api.post("attendance/", attendanceData);
+      setMessage("Attendance marked successfully!");
+      setShowDetails(true);
+      console.log("Response:", response.data);
+    } catch (error) {
+      console.error("Error posting attendance:", error.message);
+      setMessage(error.message || "Failed to mark attendance.");
+    }
   };
 
   return (

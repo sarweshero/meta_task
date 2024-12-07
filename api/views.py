@@ -212,31 +212,43 @@ class AttendanceView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        username = request.data.get("username")
-        if not username:
-            return Response({"error": "Username is required"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            username = request.data.get("username")
+            if not username:
+                return Response({"error": "Username is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_instance = User.objects.filter(username=username).first()
-        if not user_instance:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+            user_instance = User.objects.filter(username=username).first()
+            if not user_instance:
+                return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        latitude = request.data.get("latitude")
-        longitude = request.data.get("longitude")
-        # Check if latitude and longitude are provided
-        if latitude is None or longitude is None:
-            return Response({"error": "Latitude and Longitude are required"}, status=status.HTTP_400_BAD_REQUEST)
+            latitude = request.data.get("latitude")
+            longitude = request.data.get("longitude")
+            time = request.data.get("time")  # Retrieve the time from the request
 
-        # Create a new attendance record
-        attendance = Attendance.objects.create(
-            user=user_instance,
-            username=username,
-            latitude=latitude,
-            longitude=longitude,
-        )
+            if latitude is None or longitude is None:
+                return Response({"error": "Latitude and Longitude are required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = AttendanceSerializer(attendance)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            if not time:
+                return Response({"error": "Time is required"}, status=status.HTTP_400_BAD_REQUEST)
 
+            # Create a new attendance record
+            attendance = Attendance.objects.create(
+                user=user_instance,
+                username=username,
+                latitude=latitude,
+                longitude=longitude,
+                time=time  # Save the time field
+            )
+
+            serializer = AttendanceSerializer(attendance)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except ValidationError as e:
+            return Response({"error": "Invalid data", "details": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": "An unexpected error occurred", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    
 class WorkDetailView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, pk):  # Change 'id' to 'pk'
