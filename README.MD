@@ -1,5 +1,5 @@
 #backend
-pyton -m venv env
+python -m venv env
 env\scripts\activate.bat
 
 pip install django djangorestframework pillow
