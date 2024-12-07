@@ -7,7 +7,7 @@ class UserSerializer(serializers.ModelSerializer):
         # Include all fields except `last_login` and `is_superuser`
         fields = [
             "id", "username", "password", "first_name", "last_name", 
-            "email"
+            "email", "is_staff"
         ]
         extra_kwargs = {
             "password": {"write_only": True},
@@ -21,7 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
 class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendance
-        fields = ['latitude', 'longitude', 'user_id', 'time']
+        fields = ['latitude', 'longitude', 'user_id', 'time', 'username']
         extra_kwargs = {
             "time": {"read_only": True},
         }
@@ -73,15 +73,28 @@ class ProfileSerializer(serializers.ModelSerializer):
         return None
 
 
-class WorkSerializer(serializers.ModelSerializer):
-    media = serializers.SerializerMethodField()
+class AdminSerializer(serializers.ModelSerializer):
+    project_count = serializers.SerializerMethodField()
+    course_count = serializers.SerializerMethodField()
+    work_count = serializers.SerializerMethodField()
+    attendance_count = serializers.SerializerMethodField()
 
     class Meta:
-        model = work
-        fields = ['id', 'title', 'description', 'media', 'created_at', 'username', 'user']
+        model = Profile
+        fields = [
+            'id', 'user', 'name', 'domain', 'linkedin_url', 'github_url', 
+            'mail_id', 'phone_no', 'profile_photo',
+            'project_count', 'course_count', 'work_count', 'attendance_count'
+        ]
 
-    def get_media(self, obj):
-        request = self.context.get('request')
-        if obj.media and request:
-            return request.build_absolute_uri(obj.media.url)
-        return None
+    def get_project_count(self, obj):
+        return Project.objects.filter(user=obj.user).count()
+
+    def get_course_count(self, obj):
+        return Course.objects.filter(user=obj.user).count()
+
+    def get_work_count(self, obj):
+        return work.objects.filter(user=obj.user).count()
+
+    def get_attendance_count(self, obj):
+        return Attendance.objects.filter(user=obj.user).count()

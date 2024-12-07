@@ -14,6 +14,13 @@ urlpatterns = [
     path('project/', ProjectView.as_view(), name='Project-list'),
     path('project/<int:pk>/', ProjectDetailView.as_view(), name='Project-detail'),
     path('profile/<str:username>/', ProfileView.as_view(), name='profile-detail'),
+    path('adm-statistics/', StatisticsView.as_view(), name='statistics'),
+    path('adm-members/', MemberListView.as_view(), name='member-list'),
+    path('adm-attendance/', AttendanceListView.as_view(), name='attendance-list'),
+    path('adm-courses/', CourseListView.as_view(), name='course-list'),
+    path('adm-works/', WorkListView.as_view(), name='work-list'),
+    path('adm-projects/', ProjectListView.as_view(), name='project-list'),
+    path('adm-profiles/', ProfileListView.as_view(), name='profile-list'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

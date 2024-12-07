@@ -3,7 +3,8 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.models import User
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
@@ -13,6 +14,124 @@ import re
 
 # Regex pattern for validating URLs (LinkedIn and GitHub)
 URL_REGEX = re.compile(r"^(https?:\/\/)?([\w\d-]+\.)+[\w]{2,}(\/.+)*\/?$")
+
+class AttendanceListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        attendance = Attendance.objects.all()
+        serializer = AttendanceSerializer(attendance, many=True, context={"request": request})
+        return Response(serializer.data)
+
+
+class CourseListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        courses = Course.objects.all()
+        serializer = CourseSerializer(courses, many=True, context={"request": request})
+        return Response(serializer.data)
+
+
+class WorkListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        works = work.objects.all()
+        serializer = WorkSerializer(works, many=True, context={"request": request})
+        return Response(serializer.data)
+
+
+class ProjectListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        projects = Project.objects.all()
+        serializer = ProjectSerializer(projects, many=True, context={"request": request})
+        return Response(serializer.data)
+
+
+class ProfileListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profiles = Profile.objects.all()
+        serializer = ProfileSerializer(profiles, many=True, context={"request": request})
+        return Response(serializer.data)
+    
+class MemberListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profiles = Profile.objects.all()
+        members = []
+
+        for profile in profiles:
+            user = profile.user
+            project_count = Project.objects.filter(user=user).count()
+            course_count = Course.objects.filter(user=user).count()
+
+            members.append({
+                "id": user.id,
+                "username": user.username,
+                "name": profile.name,
+                "expertise": profile.domain,
+                "profile_picture": request.build_absolute_uri(profile.profile_photo.url) if profile.profile_photo else None,
+                "linkedin": profile.linkedin_url,
+                "github": profile.github_url,
+                "project_count": project_count,
+                "courses_completed": course_count,
+            })
+
+        return Response(members)
+
+
+class StatisticsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Total counts
+        total_profiles = Profile.objects.count()
+        total_projects = Project.objects.count()
+
+        # Individual counts
+        user_data = []
+        for user in User.objects.all():
+            profile_count = Profile.objects.filter(user=user).count()
+            project_count = Project.objects.filter(user=user).count()
+
+            user_data.append({
+                "username": user.username,
+                "profile_count": profile_count,
+                "project_count": project_count,
+            })
+
+        response_data = {
+            "total_profiles": total_profiles,
+            "total_projects": total_projects,
+            "individual_counts": user_data,
+        }
+
+        return Response(response_data)
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        user = self.user
+
+        # Check if the user is a staff user
+        if not user.is_staff:
+            raise serializers.ValidationError("Only staff users can log in.")
+
+        # Include any additional data you want to return
+        data["username"] = user.username
+        return data
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+        
 
 # SignUp API view
 class CreateUserView(generics.CreateAPIView):
@@ -157,6 +276,7 @@ class Workview(APIView):
         try:
             work_report = work.objects.create(
                 user=user_instance,
+                username=username,
                 title=title,
                 description=description,
                 media=media,
@@ -278,6 +398,7 @@ class ProjectView(APIView):
         try:
             Project_report = Project.objects.create(
                 user=user_instance,
+                username=username,
                 project_title=project_title,
                 description=description,
                 proof=proof,
