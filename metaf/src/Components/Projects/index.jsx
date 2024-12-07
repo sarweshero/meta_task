@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import "./Project.css";
 
-const WorkReport = () => {
+const ProjectReport = () => {
   const [reportsList, setReportsList] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -49,7 +49,7 @@ const WorkReport = () => {
   
 
   const handleSubmit = async (formData) => {
-    console.log("Submitting report:", formData);
+    console.log("Submitting Project:", formData);
     setLoading(true);
     try {
       const response = await api.post("/project/", formData, {
@@ -71,7 +71,7 @@ const WorkReport = () => {
 
   // Filter reports based on search term
   const filteredReports = reportsList.filter((report) => {
-    const title = report.title || ''; // Ensure title is a string, default to empty string if undefined
+    const title = report.project_title || ''; // Ensure title is a string, default to empty string if undefined
     const description = report.description || ''; // Ensure description is a string, default to empty string if undefined
     const search = searchTerm.toLowerCase();
   
@@ -82,9 +82,9 @@ const WorkReport = () => {
   });
 
   return (
-    <div className="workreport-container">
+    <div className="ProjectReport-container">
       <Navbar />
-      <h2>Work Report</h2>
+      <h2>Project Report</h2>
 
       <UploadForm onSubmit={handleSubmit} loading={loading} />
 
@@ -92,13 +92,13 @@ const WorkReport = () => {
       <div>
         <input
           type="text"
-          placeholder="Search reports"
+          placeholder="Search Projects"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <h3 className="submitted-reports-heading">Submitted Reports</h3>
+      <h3 className="submitted-reports-heading">Submitted Projects</h3>
       {loading && <p>Loading...</p>}
 
       <div className="cards-container">
@@ -133,4 +133,4 @@ const WorkReport = () => {
   );
 };
 
-export default WorkReport;
+export default ProjectReport;
