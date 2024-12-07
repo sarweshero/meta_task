@@ -43,13 +43,13 @@ const UploadForm = ({ onSubmit, loading }) => {
     <form onSubmit={handleSubmit}>
       <input
         type="text"
-        placeholder="Title"
+        placeholder="Project Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         required
       />
       <textarea
-        placeholder="Enter Report Description"
+        placeholder="Enter Project Description"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         required
@@ -86,7 +86,7 @@ const UploadForm = ({ onSubmit, loading }) => {
       )}
 
       <button type="submit" disabled={loading}>
-        {loading ? "Submitting..." : "Submit Report"}
+        {loading ? "Submitting..." : "Submit Project"}
       </button>
     </form>
   );
