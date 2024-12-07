@@ -6,7 +6,5 @@ pip install django djangorestframework pillow
 
 #frontend
 npm install
-npm i axios react-react-dom jwt-decode
-npm install --save react-fontawesome
-npm install date-fns
+npm i axios react-router-dom jwt-decode date-fns --save react-fontawesome
 npm install react-pdf-viewer
