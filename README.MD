@@ -2,7 +2,11 @@
 python -m venv env
 env\scripts\activate.bat
 
-pip install django djangorestframework pillow
+pip install -r requirements.txt
+
+python manage.py makemigrations
+python manage.py migrate
+python manage.py runserver
 
 #frontend
 npm install
