@@ -7,7 +7,6 @@ import UploadForm from "../Projects/uploadForm.jsx";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import "./Project.css";
-
 const ProjectReport = () => {
   const [reportsList, setReportsList] = useState([]);
   const [error, setError] = useState(null);

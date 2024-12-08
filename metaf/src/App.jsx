@@ -10,7 +10,7 @@ import ProjectDetails from "./Components/Projects/ProjectDetails";
 import Login from "./Components/Home/Login/Login";
 import CourseDetails from "./Components/Courses/CourseDetails";
 import ProtectedRoute from "./Components/ProtectedRoute";
-import NotFound from "./pages/NotFound";
+import NotFound from "./Components/NotFound";
 import ReportDetails from "./Components/WorkReport/ReportDetails";
 
 // Logout Functionality
