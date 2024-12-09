@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import make_aware
+from datetime import datetime
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -214,6 +216,7 @@ class AttendanceView(APIView):
     def post(self, request):
         try:
             username = request.data.get("username")
+            time = request.data.get("time")
             if not username:
                 return Response({"error": "Username is required"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -221,26 +224,19 @@ class AttendanceView(APIView):
             if not user_instance:
                 return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-            latitude = request.data.get("latitude")
-            longitude = request.data.get("longitude")
-            time = request.data.get("time")  # Retrieve the time from the request
 
-            if latitude is None or longitude is None:
-                return Response({"error": "Latitude and Longitude are required"}, status=status.HTTP_400_BAD_REQUEST)
-
-            if not time:
-                return Response({"error": "Time is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Create a new attendance record
-            attendance = Attendance.objects.create(
+            attendance_time = datetime.strptime(time, "%Y-%m-%d %H:%M:%S")
+                        
+            # Save aware_datetime to the database
+            attendance_record = Attendance.objects.create(
                 user=user_instance,
                 username=username,
-                latitude=latitude,
-                longitude=longitude,
-                time=time  # Save the time field
+                latitude=request.data.get("latitude"),
+                longitude=request.data.get("longitude"),
+                time=attendance_time
             )
 
-            serializer = AttendanceSerializer(attendance)
+            serializer = AttendanceSerializer(attendance_record)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except ValidationError as e:
