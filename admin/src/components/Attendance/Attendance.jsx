@@ -6,17 +6,22 @@ function Attendance() {
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedUsername, setSelectedUsername] = useState("");
+  const [selectedName, setSelectedName] = useState("");
   const [selectedStartDate, setSelectedStartDate] = useState("");
   const [selectedEndDate, setSelectedEndDate] = useState("");
+  const [selectedSession, setSelectedSession] = useState(""); // New state for session filtering
 
   // Fetch attendance data on component mount
   useEffect(() => {
     const fetchAttendance = async () => {
       try {
-        const response = await api.get("adm-attendance/"); // Ensure the correct endpoint
-        setAttendanceData(response.data);
-        setFilteredData(response.data); // Set both data and filteredData initially
+        const response = await api.get("adm-attendance/");
+        const dataWithSession = response.data.map((item) => {
+          const session = getSessionFromTime(item.time); // Assign session based on time
+          return { ...item, session }; // Add session to each attendance item
+        });
+        setAttendanceData(dataWithSession);
+        setFilteredData(dataWithSession); // Set both data and filteredData initially
         setLoading(false);
       } catch (err) {
         setError(err.message || "Failed to fetch attendance data");
@@ -27,34 +32,51 @@ function Attendance() {
     fetchAttendance();
   }, []);
 
-  // Handle dropdown change to filter by username
-  const handleUsernameSelection = (event) => {
-    const username = event.target.value;
-    setSelectedUsername(username);
-    applyFilters(username, selectedStartDate, selectedEndDate);
+  // Function to determine session based on the time
+  const getSessionFromTime = (time) => {
+    const date = new Date(time);
+    const hours = date.getHours();
+
+    if (hours >= 6 && hours < 12) return "Morning"; // Morning session (6 AM to 12 PM)
+    if (hours >= 12 && hours < 18) return "Afternoon"; // Afternoon session (12 PM to 6 PM)
+    return "Evening"; // Evening session (6 PM to 12 AM)
+  };
+
+  // Handle dropdown change to filter by name
+  const handleNameSelection = (event) => {
+    const name = event.target.value;
+    setSelectedName(name);
+    applyFilters(name, selectedStartDate, selectedEndDate, selectedSession);
   };
 
   // Handle start date change to filter by start date
   const handleStartDateChange = (event) => {
     const startDate = event.target.value;
     setSelectedStartDate(startDate);
-    applyFilters(selectedUsername, startDate, selectedEndDate);
+    applyFilters(selectedName, startDate, selectedEndDate, selectedSession);
   };
 
   // Handle end date change to filter by end date
   const handleEndDateChange = (event) => {
     const endDate = event.target.value;
     setSelectedEndDate(endDate);
-    applyFilters(selectedUsername, selectedStartDate, endDate);
+    applyFilters(selectedName, selectedStartDate, endDate, selectedSession);
   };
 
-  // Apply filters for username and date range
-  const applyFilters = (username, startDate, endDate) => {
+  // Handle session filter change
+  const handleSessionSelection = (event) => {
+    const session = event.target.value;
+    setSelectedSession(session);
+    applyFilters(selectedName, selectedStartDate, selectedEndDate, session);
+  };
+
+  // Apply filters for name, date range, and session type
+  const applyFilters = (name, startDate, endDate, session) => {
     let filtered = attendanceData;
 
-    // Filter by username
-    if (username) {
-      filtered = filtered.filter((item) => item.username === username);
+    // Filter by name
+    if (name) {
+      filtered = filtered.filter((item) => item.name === name);
     }
 
     // Filter by date range
@@ -72,31 +94,45 @@ function Attendance() {
       });
     }
 
+    // Filter by session
+    if (session) {
+      filtered = filtered.filter((item) => item.session === session);
+    }
+
     setFilteredData(filtered);
   };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
-  // Extract unique usernames for the dropdown menu
-  const uniqueUsernames = [
-    ...new Set(attendanceData.map((item) => item.username)),
-  ];
+  // Extract unique names and sessions for the dropdown menus
+  const uniqueNames = [...new Set(attendanceData.map((item) => item.name))];
+  const uniqueSessions = [...new Set(attendanceData.map((item) => item.session))]; // Assuming "session" field exists
+
+  // Function to determine row color based on session
+  const getRowColor = (session) => {
+    if (!session) return "#ffffff"; // Default white for no session value
+
+    if (session === "Morning") return "#00c3ff"; // Light blue for Morning
+    if (session === "Afternoon") return "#e41414"; // Light red for Afternoon
+
+    return "#ffffff"; // Default to white if session is unrecognized
+  };
 
   return (
     <div style={{ padding: "20px" }}>
       <h1>Attendance Details</h1>
       {/* Filters Section */}
       <div style={{ marginBottom: "20px", display: "flex", gap: "20px" }}>
-        {/* Username Filter */}
+        {/* Name Filter */}
         <div>
-          <label htmlFor="username-dropdown" style={{ marginRight: "10px" }}>
-            Select Username:
+          <label htmlFor="name-dropdown" style={{ marginRight: "10px" }}>
+            Select Name:
           </label>
           <select
-            id="username-dropdown"
-            value={selectedUsername}
-            onChange={handleUsernameSelection}
+            id="name-dropdown"
+            value={selectedName}
+            onChange={handleNameSelection}
             style={{
               padding: "8px",
               border: "1px solid #ddd",
@@ -105,9 +141,9 @@ function Attendance() {
             }}
           >
             <option value="">All Users</option>
-            {uniqueUsernames.map((username, index) => (
-              <option key={index} value={username}>
-                {username || "N/A"}
+            {uniqueNames.map((name, index) => (
+              <option key={index} value={name}>
+                {name || "N/A"}
               </option>
             ))}
           </select>
@@ -148,35 +184,58 @@ function Attendance() {
             }}
           />
         </div>
+
+        {/* Session Filter */}
+        <div>
+          <label htmlFor="session-dropdown" style={{ marginRight: "10px" }}>
+            Select Session:
+          </label>
+          <select
+            id="session-dropdown"
+            value={selectedSession}
+            onChange={handleSessionSelection}
+            style={{
+              padding: "8px",
+              border: "1px solid #ddd",
+              borderRadius: "4px",
+              width: "200px",
+            }}
+          >
+            <option value="">All Sessions</option>
+            {uniqueSessions.map((session, index) => (
+              <option key={index} value={session}>
+                {session || "N/A"}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Attendance Table */}
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
-            <th style={tableHeaderStyle}>Username</th>
+            <th style={tableHeaderStyle}>Name</th>
             <th style={tableHeaderStyle}>Latitude</th>
             <th style={tableHeaderStyle}>Longitude</th>
             <th style={tableHeaderStyle}>Time</th>
+            <th style={tableHeaderStyle}>Session</th>
           </tr>
         </thead>
         <tbody>
           {filteredData.length > 0 ? (
             filteredData.map((attendance, index) => (
-              <tr key={index}>
-                <td style={tableCellStyle}>{attendance.username || "N/A"}</td>
-                <td style={tableCellStyle}>{attendance.latitude}</td>
-                <td style={tableCellStyle}>{attendance.longitude}</td>
-                <td style={tableCellStyle}>
-                  {new Date(attendance.time).toLocaleString()}
-                </td>
+              <tr key={index} style={{ backgroundColor: getRowColor(attendance.session) }}>
+                <td style={tableCellStyle}><strong>{attendance.name}</strong></td>
+                <td style={tableCellStyle}><strong>{attendance.latitude}</strong></td>
+                <td style={tableCellStyle}><strong>{attendance.longitude}</strong></td>
+                <td style={tableCellStyle}><strong>{new Date(attendance.time).toLocaleString()}</strong></td>
+                <td style={tableCellStyle}><strong>{attendance.session}</strong></td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="4" style={{ textAlign: "center", padding: "10px" }}>
-                No records found
-              </td>
+              <td colSpan="5" style={tableCellStyle}>No data available</td>
             </tr>
           )}
         </tbody>
@@ -186,17 +245,16 @@ function Attendance() {
 }
 
 const tableHeaderStyle = {
+  padding: "10px",
   backgroundColor: "#000",
-  color: "#fff",
-  fontWeight: "bold",
   textAlign: "left",
-  border: "1px solid #ddd",
-  padding: "8px",
+  borderBottom: "1px solid #333",
 };
 
 const tableCellStyle = {
-  border: "1px solid #ddd",
+  color: "#000",
   padding: "8px",
+  border: "1px solid #333",
 };
 
 export default Attendance;

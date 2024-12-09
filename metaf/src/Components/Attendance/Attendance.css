@@ -72,7 +72,7 @@ p {
 /* Message Styling */
 .message {
   font-size: 1.3rem;
-  color: #ff5757; /* Prominent red for messages */
+  color: #e41414; /* Prominent red for messages */
   font-weight: bold;
   text-align: center;
   margin-top: 1rem;

@@ -58,6 +58,10 @@ const Dashboard = () => {
   const navigateToAttendance = () => {
     navigate("/attendance");
   };
+  // Navigate to Profile page
+  const navigateToProfile = () => {
+    navigate("/profile");
+  };
 
   return (
     <div className="dashboard-container">
@@ -78,7 +82,7 @@ const Dashboard = () => {
           <table>
             <thead>
               <tr>
-                <th>Reg_no</th>
+                <th>Reg_No</th>
                 <th>Profile</th>
                 <th>Name</th>
                 <th>Domain</th>
@@ -99,7 +103,15 @@ const Dashboard = () => {
                       className="profile-img"
                     />
                   </td>
-                  <td>{member.name}</td>
+                  <td>
+                  <a
+                      href="profile/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {member.name}
+                    </a>
+                    </td>
                   <td>{member.expertise}</td>
                   <td>
                     <a

@@ -19,9 +19,17 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 class AttendanceSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()  # Add 'name' field
     class Meta:
         model = Attendance
-        fields = ['latitude', 'longitude', 'user_id', 'time', 'username']
+        fields = ['latitude', 'longitude', 'user_id', 'time', 'username', 'name']
+
+    def get_name(self, obj):
+        # Fetch the 'name' from the related Profile model
+        profile = Profile.objects.filter(user=obj.user).first()  # Assuming 'user' is a ForeignKey to the User model in Attendance
+        if profile:
+            return profile.name
+        return None 
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
