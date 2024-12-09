@@ -4,7 +4,7 @@ import api from "../../../api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../../../constants";
 import './Login.css';
 
-const Login = ({ route = "token/", method = "login" }) => {
+const Login = ({ route = "user-token/", method = "login" }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
