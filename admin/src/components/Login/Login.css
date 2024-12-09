@@ -50,8 +50,7 @@ body {
   transition: border-color 0.3s;
 }
 
-.login-card input[type="text"]:focus,
-.login-card input[type="password"]:focus {
+.login-card input[type="text"]:focus{
   border-color: #007bff; /* Change border color on focus */
 }
 

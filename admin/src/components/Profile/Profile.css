@@ -20,6 +20,7 @@ body {
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  position: relative;
 }
 
 /* Profile Header */
@@ -76,6 +77,7 @@ p.loading {
   color: #4f8ef7;
   margin-bottom: 15px;
   text-transform: uppercase;
+  cursor: pointer;
 }
 
 /* Lists for Reports, Courses, Projects */
@@ -112,6 +114,75 @@ p.loading {
 .section p {
   color: #888;
   text-align: center;
+}
+
+/* Attendance Button Style */
+button {
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 114, 255, 0.2);
+  text-transform: uppercase;
+}
+
+/* Hover Effect */
+button:hover {
+  background: linear-gradient(90deg, #0072ff, #00c6ff);
+  transform: scale(1.05) translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 114, 255, 0.4);
+}
+
+/* Focused Button Style */
+button:focus {
+  outline: none;
+  box-shadow: 0 0 10px 3px rgba(0, 198, 255, 0.6);
+}
+
+/* Disabled State */
+button:disabled {
+  background: #555;
+  color: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Slide Effect for Profile */
+.profile-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.toggle-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: transparent;
+  border: none;
+  font-size: 2rem;
+  color: #4f8ef7;
+  cursor: pointer;
+}
+
+.profile-info {
+  animation: slide-in 0.5s ease-out;
+}
+
+@keyframes slide-in {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 /* Responsive Styling */

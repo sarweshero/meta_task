@@ -204,7 +204,7 @@ const Profile = () => {
               placeholder="LinkedIn"
             />
           ) : (
-            <p><strong>LinkedIn:</strong> <a href={userData.linkedin_url}>{userData.linkedin_url}</a></p>
+            <p><strong>LinkedIn:</strong> <a href={userData.linkedin_url} target="_blank">{userData.linkedin_url}</a></p>
           )}
 
           {/* GitHub */}
@@ -217,7 +217,7 @@ const Profile = () => {
               placeholder="GitHub"
             />
           ) : (
-            <p><strong>GitHub:</strong> <a href={userData.github_url}>{userData.github_url}</a></p>
+            <p><strong>GitHub:</strong> <a href={userData.github_url} target="_blank">{userData.github_url}</a></p>
           )}
 
           {/* About Section */}

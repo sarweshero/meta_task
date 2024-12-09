@@ -50,7 +50,7 @@ const Dashboard = () => {
   // Handle logout
   const handleLogout = () => {
     localStorage.clear();
-    navigate("/login");
+    navigate("/");
     window.location.reload();
   };
 
@@ -106,7 +106,7 @@ const Dashboard = () => {
                   <td>
                     <a
                       href={`/profile/${member.username}`}  // Pass member ID in the URL
-                      target="_blank"
+                      target="_parent"
                       rel="noopener noreferrer"
                     >
                       {member.name}

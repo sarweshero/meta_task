@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import api from "../../api"; // Assuming you have an axios instance set up for API calls
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../../api";
 import "./Profile.css";
 
 const authToken = localStorage.getItem("access");
 
 const Profile = () => {
-  const { username } = useParams(); // Capture the member's username from the URL
+  const { username } = useParams();
+  const navigate = useNavigate();
   const [member, setMember] = useState(null);
   const [workReports, setWorkReports] = useState([]);
   const [courses, setCourses] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showProfile, setShowProfile] = useState(true);
+  const [showWorkReports, setShowWorkReports] = useState(false);
+  const [showCourses, setShowCourses] = useState(false);
+  const [showProjects, setShowProjects] = useState(false);
 
-  // Fetch member's profile and other data based on member's ID
   const fetchMemberData = async () => {
     if (!username) {
       setError("Username is required in the URL.");
@@ -23,22 +27,20 @@ const Profile = () => {
     }
 
     try {
-      setLoading(true); // Start loading
-      
+      setLoading(true);
 
-      // Fetch the member's profile using username
       const memberResponse = await api.get(`profile/${username}/`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
 
       setMember(memberResponse.data);
 
-      // After fetching the profile, use member's ID to fetch work reports, courses, and projects
-      const id = memberResponse.data.user; // Get the member's ID from the response
+      const id = memberResponse.data.user;
       const workReportsResponse = await api.get(`/adm-works/${id}/`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
       setWorkReports(workReportsResponse.data);
+
       const coursesResponse = await api.get(`/adm-courses/${id}/`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
@@ -49,13 +51,10 @@ const Profile = () => {
       });
       setProjects(projectsResponse.data);
     } catch (error) {
-    
       console.error("Error fetching member data:", error);
-      
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
-    
   };
 
   useEffect(() => {
@@ -65,17 +64,28 @@ const Profile = () => {
       setError("Username is required in the URL.");
       setLoading(false);
     }
-  }, [username]); // Re-fetch data when the username changes
+  }, [username]);
 
-  // Render the profile
   return (
     <div className="profile-container">
-      {loading && <p>Loading...</p>} {/* Loading state */}
-      {error && <p className="error-message">{error}</p>} {/* Error state */}
+      {loading && <p>Loading...</p>}
+      {error && <p className="error-message">{error}</p>}
 
-      {member && !loading && (
+
+      {showProfile && member && !loading && (
         <>
           <h2>{member.name}'s Profile</h2>
+          <button
+            onClick={() => {
+              if (window.history.length > 1) {
+                navigate(-1); // Go back to the previous page
+              } else {
+                navigate("/dashboard"); // Navigate to the home page if there's no history
+              }
+            }}
+          >
+            Back
+          </button>
           <div className="profile-info">
             <img
               src={member.profile_photo}
@@ -95,75 +105,87 @@ const Profile = () => {
             </p>
           </div>
 
-          {/* Work Reports */}
+          {/* Work Reports Section */}
           <div className="section">
-            <h3>Work Reports</h3>
-            {workReports && workReports.length > 0 ? (
+            <h3 onClick={() => setShowWorkReports((prevState) => !prevState)}>
+              Work Reports {showWorkReports ? "▲" : "▼"}
+            </h3>
+            {showWorkReports && (
               <ul>
-                {workReports.map((workReports) => (
-                  <li key={workReports.id}>
-                    <strong>{workReports.title}</strong>
-                    <p>{workReports.description}</p>
-                    {workReports.media && (
-                      <img
-                        src={workReports.media}
-                        alt={workReports.title}
-                        style={{ maxWidth: "300px", marginTop: "10px" }}
-                      />
-                    )}
-                  </li>
-                ))}
+                {workReports.length ? (
+                  workReports.map((workReport) => (
+                    <li key={workReport.id}>
+                      <strong>{workReport.title}</strong>
+                      <p>{workReport.description}</p>
+                      {workReport.media && (
+                        <img
+                          src={workReport.media}
+                          alt={workReport.title}
+                          style={{ maxWidth: "100px", marginTop: "10px",cursor:"pointer" }}
+                        />
+                      )}
+                    </li>
+                  ))
+                ) : (
+                  <p>No work reports found</p>
+                )}
               </ul>
-            ) : (
-              <p>No work reports found</p>
             )}
           </div>
 
-          {/* Courses */}
+          {/* Courses Completed Section */}
           <div className="section">
-            <h3>Courses Completed</h3>
-            {courses.length ? (
+            <h3 onClick={() => setShowCourses((prevState) => !prevState)}>
+              Courses Completed {showCourses ? "▲" : "▼"}
+            </h3>
+            {showCourses && (
               <ul>
-                {courses.map((courses) => (
-                  <li key={courses.id}>
-                  <strong>{courses.course_name}</strong>
-                  <p>{courses.platform}</p>
-                  {courses.certificate && (
-                    <img
-                      src={courses.certificate}
-                      alt={courses.course_name}
-                      style={{ maxWidth: "300px", marginTop: "10px" }}
-                    />
-                  )}
-                </li>
-                ))}
+                {courses.length ? (
+                  courses.map((course) => (
+                    <li key={course.id}>
+                      <strong>{course.course_name}</strong>
+                      <p>{course.platform}</p>
+                      {course.certificate && (
+                        <img
+                          src={course.certificate}
+                          alt={course.course_name}
+                          style={{ maxWidth: "100px", marginTop: "10px",cursor:"pointer" }}
+                        />
+                      )}
+                    </li>
+                  ))
+                ) : (
+                  <p>No courses found</p>
+                )}
               </ul>
-            ) : (
-              <p>No courses found</p>
             )}
           </div>
 
-          {/* Projects */}
+          {/* Projects Completed Section */}
           <div className="section">
-            <h3>Projects Completed</h3>
-            {projects.length ? (
+            <h3 onClick={() => setShowProjects((prevState) => !prevState)}>
+              Projects Completed {showProjects ? "▲" : "▼"}
+            </h3>
+            {showProjects && (
               <ul>
-                {projects.map((projects) => (
-                    <li key={projects.id}>
-                    <strong>{projects.project_title}</strong>
-                    <p>{projects.description}</p>
-                    {projects.proof && (
-                      <img
-                        src={projects.proof}
-                        alt={projects.project_title}
-                        style={{ maxWidth: "300px", marginTop: "10px" }}
-                      />
-                    )}
-                  </li>
-                ))}
+                {projects.length ? (
+                  projects.map((project) => (
+                    <li key={project.id}>
+                      <strong>{project.project_title}</strong>
+                      <p>{project.description}</p>
+                      {project.proof && (
+                        <img
+                          src={project.proof}
+                          alt={project.project_title}
+                          style={{ maxWidth: "100px", marginTop: "10px",cursor:"pointer" }}
+                        />
+                      )}
+                    </li>
+                  ))
+                ) : (
+                  <p>No projects found</p>
+                )}
               </ul>
-            ) : (
-              <p>No projects found</p>
             )}
           </div>
         </>
