@@ -44,21 +44,38 @@ const CourseDetails = () => {
           </p><br />
 
           {/* Certificate rendering */}
+        
           {course.certificate && (
             <div className="card-media">
-              {course.certificate.endsWith(".jpg") || course.certificate.endsWith(".png") ? (
-                <img src={course.certificate} alt="certificate" />
-              ) : course.certificate.endsWith(".mp4") ? (
-                <video controls>
-                  <source src={course.certificate} type="video/mp4" />
+              {course.certificate.endsWith(".jpg") ||
+              course.certificate.endsWith(".jpeg") ||
+              course.certificate.endsWith(".png") ||
+              course.certificate.endsWith(".gif") ? (
+                <img
+                  src={course.certificate}
+                  alt="Media"
+                  style={{ width: "300px", height: "auto" }}
+                />
+              ) : course.certificate.endsWith(".mp4") ||
+                course.certificate.endsWith(".mov") ||
+                course.certificate.endsWith(".avi") ? (
+                <video controls style={{ width: "300px", height: "auto" }}>
+                  <source src={course.certificate} />
                   Your browser does not support the video tag.
                 </video>
-              ) : course.certificate.endsWith(".pdf") ? (
-                <div>
-                  <a href={course.certificate} target="blank">certificate</a>
-                </div>
               ) : (
-                <a href={course.certificate} target="blank" >certificate</a>
+                <a
+                  href={course.certificate}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    textDecoration: "none",
+                    color: "#007bff",
+                    fontWeight: "bold",
+                  }}
+                >
+                  View File
+                </a>
               )}
             </div>
           )}

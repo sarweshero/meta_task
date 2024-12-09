@@ -70,18 +70,40 @@ const UploadForm = ({ onSubmit, loading }) => {
           />
         </div>
 
-        <div className="preview-container">
+        {/* Preview Container */}
+      {previews.length > 0 && (
+        <div className="preview-container" style={{ marginTop: "10px" }}>
           {previews.map((preview, index) => (
-            <div className="preview-item" key={index}>
-              {preview === "pdf" ? (
-                <div className="pdf-preview">
-                  <span role="img" aria-label="pdf-icon">📄</span>
-                  <p>PDF file uploaded</p>
-                </div>
-              ) : preview && <img src={preview} alt="preview" width="100" />}
+            <div key={index} style={{ marginBottom: "10px" }}>
+              {preview.type === "image" ? (
+                <img
+                  src={preview.url}
+                  alt={`Preview ${index + 1}`}
+                  style={{ width: "300px", height: "auto" }}
+                />
+              ) : preview.type === "video" ? (
+                <video controls style={{ width: "300px", height: "auto" }}>
+                  <source src={preview.url} />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <a
+                  href={preview.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    textDecoration: "none",
+                    color: "#007bff",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {preview.name}
+                </a>
+              )}
             </div>
           ))}
         </div>
+      )}
 
         <button type="submit" disabled={loading} className="submit-btn">
           {loading ? "Submitting..." : "Submit"}
