@@ -121,7 +121,7 @@ const Profile = () => {
       <div className="profile-page">
         {error && <div className="error-message">{error}</div>}
 
-        <div className="profile-section card">
+        <div className="profile-section-card">
           {/* Profile photo */}
           <img
             src={

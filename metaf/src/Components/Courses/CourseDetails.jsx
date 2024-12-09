@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import Navbar from "../../Components/Navbar/index";
 import api from "../../api"; // Axios instance with token handling
 import { format } from "date-fns";
-import { Document, Page } from 'react-pdf'; // Import react-pdf
 import "./Course.css";
 
 const CourseDetails = () => {

@@ -40,12 +40,11 @@ const UploadForm = ({ onSubmit, loading }) => {
 
   return (
     <div className="upload-form">
-      <h4>Submit Course Certificate</h4>
       <form onSubmit={handleSubmit}>
         <div className="form-field">
-          <label>Course Name</label>
           <input
             type="text"
+            placeholder="Course Name"
             value={course}
             onChange={(e) => setCourse(e.target.value)}
             required
@@ -53,9 +52,9 @@ const UploadForm = ({ onSubmit, loading }) => {
         </div>
 
         <div className="form-field">
-          <label>Platform</label>
           <input
             type="text"
+            placeholder="Platform"
             value={platform}
             onChange={(e) => setPlatform(e.target.value)}
             required
@@ -63,12 +62,11 @@ const UploadForm = ({ onSubmit, loading }) => {
         </div>
 
         <div className="form-field">
-          <label>Certificate</label>
           <input
             type="file"
+            placeholder="Certificate"
             accept="image/*,video/*,audio/*,application/pdf"
             onChange={handleMediaChange}
-            multiple
           />
         </div>
 

@@ -88,7 +88,7 @@ const ProjectReport = () => {
       <UploadForm onSubmit={handleSubmit} loading={loading} />
 
       {error && <div className="error-message">{error}</div>}
-      <div>
+      <div className="search-bar">
         <input
           type="text"
           placeholder="Search Projects"
