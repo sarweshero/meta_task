@@ -109,22 +109,43 @@ const Course = () => {
               <Link to={`/courses/${course.id}`} className="view-details-btn">
                 <h4>{course.course_name}</h4>
                 <p>{course.platform}</p>
-                
-                {course.certificate ? (
-                  <div className="card-certificate">
-                    {/* Check if the certificate is a PDF file */}
-                    {course.certificate.endsWith('.pdf') ? (
-                      <Document file={course.certificate}>
-                        <Page pageNumber={1} />
-                      </Document>
+                </Link>
+                  {course.certificate && (
+                  <div className="card-media">
+                    {course.certificate.endsWith(".jpg") ||
+                    course.certificate.endsWith(".jpeg") ||
+                    course.certificate.endsWith(".png") ||
+                    course.certificate.endsWith(".gif") ? (
+                      <img
+                        src={course.certificate}
+                        alt="Media"
+                        style={{ width: "300px", height: "auto" }}
+                      />
+                    ) : course.certificate.endsWith(".mp4") ||
+                      course.certificate.endsWith(".mov") ||
+                      course.certificate.endsWith(".avi") ? (
+                      <video controls style={{ width: "300px", height: "auto" }}>
+                        <source src={course.certificate} />
+                        Your browser does not support the video tag.
+                      </video>
                     ) : (
-                      <img src={course.certificate} alt="certificate" />
+                      <a
+                        href={course.certificate}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          textDecoration: "none",
+                          color: "#007bff",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        View File
+                      </a>
                     )}
                   </div>
-                ) : (
-                  <p>No certificate available</p>
                 )}
-                
+                <br />
+                <Link to={`/courses/${course.id}`} className="view-details-btn">
                 <p className="report-date">
                   {course.uploaded_at
                     ? format(new Date(course.uploaded_at), "PPP p")

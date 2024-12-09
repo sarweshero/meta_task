@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "../../Components/Navbar/index";
 import api from "../../api"; // Axios instance with token handling
-import { format } from 'date-fns';
+import { format } from "date-fns";
 import "./WorkReport.css";
 
 const ReportDetails = () => {
@@ -38,13 +38,56 @@ const ReportDetails = () => {
       <Navbar />
       {report ? (
         <>
-          <h2><center className="det">Title: {report.title}</center></h2> <br />
-          <p><u className="det">Description:</u> <br /><br /><b className="det_p"> <tt >{report.description}</tt></b></p><br />
+          <h2>
+            <center className="det">Title: {report.title}</center>
+          </h2>
+          <br />
+          <p>
+            <u className="det">Description:</u> <br />
+            <br />
+            <b className="det_p">
+              <tt>{report.description}</tt>
+            </b>
+          </p>
+          <br />
+
+          {/* Media Preview */}
           {report.media && (
             <div className="card-media">
-              <img src={report.media} alt="media" />
+              {report.media.endsWith(".jpg") ||
+              report.media.endsWith(".jpeg") ||
+              report.media.endsWith(".png") ||
+              report.media.endsWith(".gif") ? (
+                <img
+                  src={report.media}
+                  alt="Media"
+                  style={{ width: "300px", height: "auto" }}
+                />
+              ) : report.media.endsWith(".mp4") ||
+                report.media.endsWith(".mov") ||
+                report.media.endsWith(".avi") ? (
+                <video controls style={{ width: "300px", height: "auto" }}>
+                  <source src={report.media} />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <a
+                  href={report.media}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    textDecoration: "none",
+                    color: "#007bff",
+                    fontWeight: "bold",
+                  }}
+                >
+                  View File
+                </a>
+              )}
             </div>
-          )} <br />
+          )}
+          <br />
+
           <p className="det">
             Submitted on: {format(new Date(report.created_at), "PPP p")}
           </p>

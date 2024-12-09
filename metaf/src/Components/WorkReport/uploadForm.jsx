@@ -11,10 +11,17 @@ const UploadForm = ({ onSubmit, loading }) => {
     setMediaFiles(files);
 
     // Generate previews for all files
-    const newPreviews = files.map((file) => ({
-      url: URL.createObjectURL(file),
-      type: file.type.split("/")[0], // image, video, etc.
-    }));
+    const newPreviews = files.map((file) => {
+      const type = file.type.split("/")[0]; // Determine the file type
+      const extension = file.name.split(".").pop().toLowerCase(); // Get file extension
+
+      return {
+        url: URL.createObjectURL(file),
+        type,
+        extension,
+        name: file.name,
+      };
+    });
     setPreviews(newPreviews);
   };
 
@@ -41,6 +48,7 @@ const UploadForm = ({ onSubmit, loading }) => {
 
   return (
     <form onSubmit={handleSubmit}>
+      
       <input
         type="text"
         placeholder="Title"
@@ -56,7 +64,7 @@ const UploadForm = ({ onSubmit, loading }) => {
       />
       <input
         type="file"
-        accept="image/*,video/*"
+        accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.txt"
         onChange={handleMediaChange}
         required
       />
@@ -78,7 +86,18 @@ const UploadForm = ({ onSubmit, loading }) => {
                   Your browser does not support the video tag.
                 </video>
               ) : (
-                <div>Unsupported file type</div>
+                <a
+                  href={preview.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    textDecoration: "none",
+                    color: "#007bff",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {preview.name}
+                </a>
               )}
             </div>
           ))}

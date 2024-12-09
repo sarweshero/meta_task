@@ -108,11 +108,43 @@ const WorkReport = () => {
               <Link to={`/work-reports/${report.id}`} className="view-details-btn">
               <h4>{report.title}</h4>
               <p>{report.description}</p>
+              </Link>
               {report.media && (
-                <div className="card-media">
-                  <img src={report.media} alt="media" />
-                </div>
+            <div className="card-media">
+              {report.media.endsWith(".jpg") ||
+              report.media.endsWith(".jpeg") ||
+              report.media.endsWith(".png") ||
+              report.media.endsWith(".gif") ? (
+                <img
+                  src={report.media}
+                  alt="Media"
+                  style={{ width: "300px", height: "auto" }}
+                />
+              ) : report.media.endsWith(".mp4") ||
+                report.media.endsWith(".mov") ||
+                report.media.endsWith(".avi") ? (
+                <video controls style={{ width: "300px", height: "auto" }}>
+                  <source src={report.media} />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <a
+                  href={report.media}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    textDecoration: "none",
+                    color: "#007bff",
+                    fontWeight: "bold",
+                  }}
+                >
+                  View File
+                </a>
               )}
+            </div>
+          )}
+          <br />
+          <Link to={`/work-reports/${report.id}`} className="view-details-btn">
               <p className="report-date">
                 {format(new Date(report.created_at), "PPP p")}
               </p>

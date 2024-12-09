@@ -29,6 +29,46 @@ body {
   color: #00d4ff;
   animation: slideInDown 1.2s ease-out;
 }
+.card-media img {
+  max-width: 100%;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.card-media video {
+  max-width: 100%;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.document-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: #007bff;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.document-link:hover {
+  text-decoration: underline;
+}
+
+.file-preview {
+  display: flex;
+  align-items: center;
+}
+
+.file-preview img {
+  width: 40px;
+  height: auto;
+  margin-right: 10px;
+}
+
+.file-preview span {
+  font-size: 14px;
+}
+
 
 /* Textarea for report submission */
 textarea {

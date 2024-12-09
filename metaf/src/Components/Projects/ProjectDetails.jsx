@@ -42,10 +42,40 @@ const ProjectDetails = () => {
           <p className="description-label"><u>Description</u></p>
           <p className="description-text">{report.description}</p>
           {report.proof && (
-            <div className="card-proof">
-              <img src={report.proof} alt="proof" className="proof-image" />
+            <div className="card-media">
+              {report.proof.endsWith(".jpg") ||
+              report.proof.endsWith(".jpeg") ||
+              report.proof.endsWith(".png") ||
+              report.proof.endsWith(".gif") ? (
+                <img
+                  src={report.proof}
+                  alt="Media"
+                  style={{ width: "300px", height: "auto" }}
+                />
+              ) : report.proof.endsWith(".mp4") ||
+                report.proof.endsWith(".mov") ||
+                report.proof.endsWith(".avi") ? (
+                <video controls style={{ width: "300px", height: "auto" }}>
+                  <source src={report.proof} />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <a
+                  href={report.proof}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    textDecoration: "none",
+                    color: "#007bff",
+                    fontWeight: "bold",
+                  }}
+                >
+                  View File
+                </a>
+              )}
             </div>
           )}
+          <br />
           <p className="submission-date">
             Submitted on: {format(new Date(report.created_at), "PPP p")}
           </p>

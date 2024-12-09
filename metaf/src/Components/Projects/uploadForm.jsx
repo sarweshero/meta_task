@@ -78,7 +78,18 @@ const UploadForm = ({ onSubmit, loading }) => {
                   Your browser does not support the video tag.
                 </video>
               ) : (
-                <div>Unsupported file type</div>
+                <a
+                  href={preview.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    textDecoration: "none",
+                    color: "#007bff",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {preview.name}
+                </a>
               )}
             </div>
           ))}
