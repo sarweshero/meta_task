@@ -172,6 +172,11 @@ const Attendance = () => {
 
         {message && <div className="message">{message}</div>}
       </div>
+
+      <footer className="footer">
+            <p>Created by <strong><span1>Muneeswaran </span1>& <span2>Sarweshwar...!</span2></strong></p>
+          </footer>
+
     </div>
   );
 };

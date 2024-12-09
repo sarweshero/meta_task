@@ -61,7 +61,7 @@ function App() {
           </section>
 
           <footer className="footer">
-            <p>Created by Muneeswaran And Sarweshwar.</p>
+            <p>Created by <strong><span1>Muneeswaran </span1>& <span2>Sarweshwar...!</span2></strong></p>
           </footer>
         </>
       )}

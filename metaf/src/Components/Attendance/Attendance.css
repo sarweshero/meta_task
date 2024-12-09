@@ -6,7 +6,6 @@
   justify-content: center;
   margin-top: 10%;
   padding: 1rem;
-  background: linear-gradient(120deg, #121212, #1a1a1a);
   background-size: cover;
   font-family: 'Poppins', sans-serif;
   color: #e0e0e0;
@@ -78,6 +77,20 @@ p {
   margin-top: 1rem;
 }
 
+.footer {
+  color: #bbb;
+  text-align: center;
+  padding: 1.5rem 0;
+  margin-top: auto;
+}
+
+span1{
+  color: #00c6ff;
+}
+
+span2{
+  color: #0072ff;
+}
 /* Media Query for Responsiveness */
 @media (max-width: 768px) {
   h1 {

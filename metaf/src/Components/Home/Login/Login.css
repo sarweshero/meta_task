@@ -3,7 +3,7 @@ body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f7f7f7; /* Light background for contrast */
+     /* Light background for contrast */
   }
   
   /* Centering the Login Form */
@@ -16,7 +16,7 @@ body {
   
   /* Card Styles */
   .login-card {
-    background-color: #ffffff;
+    background-color: #333;
     border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     padding: 40px;
@@ -41,6 +41,7 @@ body {
   /* Input Styles */
   .login-card input[type="text"],
   .login-card input[type="password"] {
+    background-color: #333;
     width: 100%;
     padding: 12px;
     margin: 10px 0;
@@ -50,15 +51,14 @@ body {
     transition: border-color 0.3s;
   }
   
-  .login-card input[type="text"]:focus,
-  .login-card input[type="password"]:focus {
-    border-color: #007bff; /* Change border color on focus */
+  .login-card input[type="text"]:focus{
+    border-color: #053c76 !important;
   }
-  
+ 
   /* Button Styles */
   .login-card button {
     background-color: #007bff; /* Primary button color */
-    color: white;
+    color: #fff;
     padding: 12px 20px;
     border: none;
     border-radius: 5px;
@@ -79,10 +79,5 @@ body {
   }
   
   /* Footer Styles */
-  .footer {
-    text-align: center;
-    margin-top: 20px;
-    color: #666;
-    font-size: 0.9em;
-  }
+  
   

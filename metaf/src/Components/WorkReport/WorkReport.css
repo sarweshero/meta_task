@@ -213,6 +213,23 @@ input[type="text"] {
 .report-details-container{
   padding: 0 10%;
 }
+
+.footer {
+  color: #bbb;
+  text-align: center;
+  padding: 1.5rem 0;
+  margin-top: auto;
+}
+
+span1{
+  color: #00c6ff;
+}
+
+span2{
+  color: #0072ff;
+}
+
+
 /* Keyframes for animations */
 @keyframes fadeIn {
   from {

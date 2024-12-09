@@ -69,6 +69,7 @@ const Login = ({ route = "user-token/", method = "login" }) => {
             onChange={(e) => setUsername(e.target.value)}
             className="form-input"
             required
+          
           />
           <input
             type="password"
@@ -83,6 +84,7 @@ const Login = ({ route = "user-token/", method = "login" }) => {
           </button>
         </form>
       </div>
+      
     </div>
   );
 };
