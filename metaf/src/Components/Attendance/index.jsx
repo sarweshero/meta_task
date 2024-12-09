@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import api from "../../api"; // Import the configured api instance
+import api from "../../api"; // Import the configured API instance
 import "./Attendance.css";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../Navbar/index.jsx";
@@ -8,41 +8,66 @@ const Attendance = () => {
   const [location, setLocation] = useState({ latitude: "", longitude: "" });
   const [showDetails, setShowDetails] = useState(false);
   const [message, setMessage] = useState("");
-  const [dateTime, setDateTime] = useState("");  // State for storing the date-time
+  const [dateTime, setDateTime] = useState(""); // State for storing the date-time
+  const [morningMarked, setMorningMarked] = useState(false); // Track morning attendance
+  const [afternoonMarked, setAfternoonMarked] = useState(false); // Track afternoon attendance
   const navigate = useNavigate();
 
-  // Get current date and time in the correct format (YYYY-MM-DD HH:MM:SS)
-  const getCurrentDateTime = () => {
+  // Function to get the current date in "YYYY-MM-DD" format
+  const getCurrentDate = () => {
     const current = new Date();
-    
-    // Get the date-time in the correct local format (YYYY-MM-DD HH:MM:SS)
-    const options = {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false, // 24-hour format
-    };
-
-    // Get local date-time with 'toLocaleString()' with options
-    const formattedDateTime = current.toLocaleString('en-GB', options).replace(",", "").replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$2-$1");
-
-    return formattedDateTime;
+    const year = current.getFullYear();
+    const month = String(current.getMonth() + 1).padStart(2, "0");
+    const day = String(current.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`; // Format: YYYY-MM-DD
   };
 
-  // Update dateTime every second
+  // Function to get the current date-time in "YYYY-MM-DD HH:mm:ss" format (in UTC)
+  const getCurrentDateTime = () => {
+    const current = new Date();
+    return current.toISOString().replace("T", " ").substring(0, 19); // Convert to "YYYY-MM-DD HH:mm:ss"
+  };
+
+  // Function to check if the current time is within allowed attendance time ranges
+  const getTimeRange = () => {
+    const currentTime = new Date();
+    const hours = currentTime.getHours();
+    const minutes = currentTime.getMinutes();
+
+    // Convert current time to minutes since midnight
+    const currentMinutes = hours * 60 + minutes;
+
+    // Define the time ranges in minutes since midnight
+    const morningStart = 8 * 60 + 30; // 8:30 AM
+    const morningEnd = 9 * 60 + 20; // 9:20 AM
+    const afternoonStart = 13 * 60 + 45; // 1:45 PM
+    const afternoonEnd = 14 * 60 + 30; // 2:30 PM
+
+    // Determine if it's morning or afternoon based on the time
+    if (currentMinutes >= morningStart && currentMinutes <= morningEnd) return "morning";
+    if (currentMinutes >= afternoonStart && currentMinutes <= afternoonEnd) return "afternoon";
+
+    return null; // Invalid time range
+  };
+
+  // Load the attendance state on component mount
   useEffect(() => {
+    const todayDate = getCurrentDate();
+    const attendanceStatus = JSON.parse(localStorage.getItem("attendanceStatus")) || {};
+
+    // Check if morning or afternoon attendance is already marked
+    if (attendanceStatus[todayDate]?.morning) setMorningMarked(true);
+    if (attendanceStatus[todayDate]?.afternoon) setAfternoonMarked(true);
+
+    // Update the dateTime every second
     const intervalId = setInterval(() => {
-      setDateTime(getCurrentDateTime()); // Update the date-time state
-    }, 1000); // Update every second
+      setDateTime(getCurrentDateTime());
+    }, 1000);
 
-    // Clean up the interval when the component is unmounted
-    return () => clearInterval(intervalId);
-  }, []); // Empty dependency array means this effect runs only once when the component mounts
+    return () => clearInterval(intervalId); // Cleanup the interval on unmount
+  }, []);
 
-  // Get user's live location
+  // Function to fetch the user's location
   const fetchLocation = () => {
     return new Promise((resolve, reject) => {
       if (navigator.geolocation) {
@@ -65,21 +90,50 @@ const Attendance = () => {
     });
   };
 
+  // Function to handle the "Mark Attendance" button click
   const handleAttendanceClick = async () => {
+    const todayDate = getCurrentDate();
+    const timeRange = getTimeRange();
+
+    if (!timeRange) {
+      setMessage("Attendance can only be marked during specific time ranges.");
+      return;
+    }
+
+    const attendanceStatus = JSON.parse(localStorage.getItem("attendanceStatus")) || {};
+    const alreadyMarked = attendanceStatus[todayDate]?.[timeRange];
+
+    if (alreadyMarked) {
+      setMessage(`You have already marked ${timeRange} attendance for today.`);
+      return;
+    }
+
     try {
-      const locationData = await fetchLocation(); // Wait for location to resolve
+      const locationData = await fetchLocation();
 
       const attendanceData = {
         username: localStorage.getItem("username"),
         latitude: locationData.latitude,
         longitude: locationData.longitude,
-        time: dateTime,  // Use the current local date-time
+        time: getCurrentDateTime(), // Send current time in "YYYY-MM-DD HH:mm:ss" format
       };
 
-      // Post attendance data
+      console.log("Attendance Data Sent:", attendanceData); // Debug log
+
       const response = await api.post("attendance/", attendanceData);
-      setMessage("Attendance marked successfully!");
+
+      // Update local storage for attendance status
+      attendanceStatus[todayDate] = attendanceStatus[todayDate] || {};
+      attendanceStatus[todayDate][timeRange] = true;
+      localStorage.setItem("attendanceStatus", JSON.stringify(attendanceStatus));
+
+      setMessage(`Attendance marked successfully for ${timeRange}!`);
       setShowDetails(true);
+
+      // Update state for attendance marking
+      if (timeRange === "morning") setMorningMarked(true);
+      if (timeRange === "afternoon") setAfternoonMarked(true);
+
       console.log("Response:", response.data);
     } catch (error) {
       console.error("Error posting attendance:", error.message);
@@ -92,15 +146,24 @@ const Attendance = () => {
       <Navbar />
       <div className="attendance-card">
         <h1>Mark Your Attendance</h1>
-        <button onClick={handleAttendanceClick}>Mark Attendance</button>
+        <button
+          onClick={handleAttendanceClick}
+          disabled={morningMarked && afternoonMarked}
+        >
+          Mark Attendance
+        </button>
 
         {showDetails && (
           <>
             <div className="date-time">
-              <p><b>Date & Time:</b> {dateTime}</p>
+              <p>
+                <b>Date & Time:</b> {dateTime}
+              </p>
             </div>
             <div className="location">
-              <p><u>Location</u></p>
+              <p>
+                <u>Location</u>
+              </p>
               <p>Latitude: {location.latitude}</p>
               <p>Longitude: {location.longitude}</p>
             </div>
