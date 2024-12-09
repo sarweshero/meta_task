@@ -107,6 +107,7 @@ const ProjectReport = () => {
               <Link to={`/projects/${report.id}`} className="view-details-btn">
               <h4>{report.project_title}</h4>
               <p>{report.description}</p>
+              </Link>
               {report.proof.endsWith(".jpg") ||
               report.proof.endsWith(".jpeg") ||
               report.proof.endsWith(".png") ||
@@ -137,6 +138,7 @@ const ProjectReport = () => {
                   View File
                 </a>
               )}
+              <Link to={`/projects/${report.id}`} className="view-details-btn">
               <p className="report-date">
                 {format(new Date(report.created_at), "PPP p")}
               </p>

@@ -118,11 +118,38 @@ const Profile = () => {
                       <strong>{workReport.title}</strong>
                       <p>{workReport.description}</p>
                       {workReport.media && (
-                        <img
-                          src={workReport.media}
-                          alt={workReport.title}
-                          style={{ maxWidth: "100px", marginTop: "10px",cursor:"pointer" }}
-                        />
+                        <div className="card-media">
+                          {workReport.media.endsWith(".jpg") ||
+                          workReport.media.endsWith(".jpeg") ||
+                          workReport.media.endsWith(".png") ||
+                          workReport.media.endsWith(".gif") ? (
+                            <img
+                              src={workReport.media}
+                              alt="Media"
+                              style={{ width: "100px", height: "auto" }}
+                            />
+                          ) : workReport.media.endsWith(".mp4") ||
+                            workReport.media.endsWith(".mov") ||
+                            workReport.media.endsWith(".avi") ? (
+                            <video controls style={{ width: "240px", height: "200px" }}>
+                              <source src={workReport.media} />
+                              Your browser does not support the video tag.
+                            </video>
+                          ) : (
+                            <a
+                              href={workReport.media}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                textDecoration: "none",
+                                color: "#007bff",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              View File
+                            </a>
+                          )}
+                        </div>
                       )}
                     </li>
                   ))
@@ -146,11 +173,38 @@ const Profile = () => {
                       <strong>{course.course_name}</strong>
                       <p>{course.platform}</p>
                       {course.certificate && (
-                        <img
-                          src={course.certificate}
-                          alt={course.course_name}
-                          style={{ maxWidth: "100px", marginTop: "10px",cursor:"pointer" }}
-                        />
+                        <div className="card-media">
+                          {course.certificate.endsWith(".jpg") ||
+                          course.certificate.endsWith(".jpeg") ||
+                          course.certificate.endsWith(".png") ||
+                          course.certificate.endsWith(".gif") ? (
+                            <img
+                              src={course.certificate}
+                              alt="Media"
+                              style={{ width: "100px", height: "auto" }}
+                            />
+                          ) : course.certificate.endsWith(".mp4") ||
+                            course.certificate.endsWith(".mov") ||
+                            course.certificate.endsWith(".avi") ? (
+                            <video controls style={{ width: "240px", height: "200px" }}>
+                              <source src={course.certificate} />
+                              Your browser does not support the video tag.
+                            </video>
+                          ) : (
+                            <a
+                              href={course.certificate}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                textDecoration: "none",
+                                color: "#007bff",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              View File
+                            </a>
+                          )}
+                        </div>
                       )}
                     </li>
                   ))
@@ -174,11 +228,38 @@ const Profile = () => {
                       <strong>{project.project_title}</strong>
                       <p>{project.description}</p>
                       {project.proof && (
-                        <img
-                          src={project.proof}
-                          alt={project.project_title}
-                          style={{ maxWidth: "100px", marginTop: "10px",cursor:"pointer" }}
-                        />
+                        <div className="card-media">
+                          {project.proof.endsWith(".jpg") ||
+                          project.proof.endsWith(".jpeg") ||
+                          project.proof.endsWith(".png") ||
+                          project.proof.endsWith(".gif") ? (
+                            <img
+                              src={project.proof}
+                              alt="Media"
+                              style={{ width: "100px", height: "auto" }}
+                            />
+                          ) : project.proof.endsWith(".mp4") ||
+                            project.proof.endsWith(".mov") ||
+                            project.proof.endsWith(".avi") ? (
+                            <video controls style={{ width: "240px", height: "200px" }}>
+                              <source src={project.proof} />
+                              Your browser does not support the video tag.
+                            </video>
+                          ) : (
+                            <a
+                              href={project.proof}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                textDecoration: "none",
+                                color: "#007bff",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              View File
+                            </a>
+                          )}
+                        </div>
                       )}
                     </li>
                   ))
