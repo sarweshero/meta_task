@@ -28,29 +28,41 @@ class AttendanceListView(APIView):
 
 class CourseListView(APIView):
     permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        courses = Course.objects.all()
+    
+    def get(self, request, pk):
+        courses = Course.objects.filter(user_id=pk).order_by("-id")  # Use 'filter()' to fetch all courses for the user
+        if not courses.exists():
+            return Response({"error": "No courses found"}, status=status.HTTP_404_NOT_FOUND)
+        
         serializer = CourseSerializer(courses, many=True, context={"request": request})
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class WorkListView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        works = work.objects.all()
+    def get(self, request, pk):
+        works = work.objects.filter(user__id=pk).order_by("-id")  # Use 'filter()' to fetch all works for the user
+        if not works.exists():
+            return Response({"error": "No works found"}, status=status.HTTP_404_NOT_FOUND)
+        
         serializer = WorkSerializer(works, many=True, context={"request": request})
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class ProjectListView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        projects = Project.objects.all()
+    def get(self, request, pk):
+        projects = Project.objects.filter(user__id=pk).order_by("-id")  # Use 'filter()' to fetch all projects for the user
+        if not projects.exists():
+            return Response({"error": "No projects found"}, status=status.HTTP_404_NOT_FOUND)
+        
         serializer = ProjectSerializer(projects, many=True, context={"request": request})
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class ProfileListView(APIView):

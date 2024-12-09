@@ -4,6 +4,7 @@ import Login from "./components/Login/Login";
 import Dashboard from "./components/Dashboard/Dashboard";  
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./components/NotFound";
+import Profile from "./components/Profile/profile"
 import Attendance from "./components/Attendance/Attendance";
 
 function App() {
@@ -26,6 +27,14 @@ function App() {
             </ProtectedRoute>
           } 
         />
+        <Route path="/profile/:username" 
+        element={
+          <ProtectedRoute>
+          <Profile />
+          </ProtectedRoute>
+        }
+        />
+
         <Route
           path="/attendance"
           element={

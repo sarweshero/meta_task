@@ -104,14 +104,15 @@ const Dashboard = () => {
                     />
                   </td>
                   <td>
-                  <a
-                      href="profile/"
+                    <a
+                      href={`/profile/${member.username}`}  // Pass member ID in the URL
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       {member.name}
                     </a>
-                    </td>
+                  </td>
+
                   <td>{member.expertise}</td>
                   <td>
                     <a

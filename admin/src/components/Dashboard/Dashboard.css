@@ -36,20 +36,42 @@ body {
     color: #fff;
 }
 
+/* Logout Button Style */
 .logout-button {
-    padding: 10px 20px;
-    background-color: #ff4d4d;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    font-weight: bold;
     color: white;
+    background: linear-gradient(90deg, #ff4d4d, #ff0000);
     border: none;
-    border-radius: 5px;
+    border-radius: 12px;
     cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 8px rgba(255, 0, 0, 0.2);
+    text-transform: uppercase;
 }
 
+/* Hover Effect */
 .logout-button:hover {
-    background-color: #e60000;
+    background: linear-gradient(90deg, #ff0000, #ff4d4d);
+    transform: scale(1.05) translateY(-3px);
+    box-shadow: 0 8px 16px rgba(255, 0, 0, 0.4);
 }
+
+/* Focused Button Style */
+.logout-button:focus {
+    outline: none;
+    box-shadow: 0 0 10px 3px rgba(255, 0, 0, 0.6);
+}
+
+/* Disabled State */
+.logout-button:disabled {
+    background: #555;
+    color: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
 
 /* Students Table Section */
 .students-table-section {
@@ -115,7 +137,7 @@ body {
 .students-table-section a:hover {
     text-decoration: underline;
 }
-    
+
 /* Stats Section */
 .stats-section {
     display: flex;
@@ -142,9 +164,44 @@ body {
     color: #007bff;
 }
 
-.stats-card:hover{
-    background-color: #1a1a1a; /* Subtle background change */
-    transform: scale(1.05); /* Slight scaling on hover */
-    box-shadow: 0 10px 20px rgba(0, 212, 255, 0.5); /* Subtle blue glow */
+.stats-card:hover {
+    background-color: #1a1a1a;
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 212, 255, 0.5);
 }
 
+/* Attendance Button Style */
+.navigate-attendance-button {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 8px rgba(0, 114, 255, 0.2);
+    text-transform: uppercase;
+}
+
+/* Hover Effect */
+.navigate-attendance-button:hover {
+    background: linear-gradient(90deg, #0072ff, #00c6ff);
+    transform: scale(1.05) translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 114, 255, 0.4);
+}
+
+/* Focused Button Style */
+.navigate-attendance-button:focus {
+    outline: none;
+    box-shadow: 0 0 10px 3px rgba(0, 198, 255, 0.6);
+}
+
+/* Disabled State */
+.navigate-attendance-button:disabled {
+    background: #555;
+    color: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+}

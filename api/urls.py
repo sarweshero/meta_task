@@ -17,9 +17,9 @@ urlpatterns = [
     path('adm-statistics/', StatisticsView.as_view(), name='statistics'),
     path('adm-members/', MemberListView.as_view(), name='member-list'),
     path('adm-attendance/', AttendanceListView.as_view(), name='attendance-list'),
-    path('adm-courses/', CourseListView.as_view(), name='course-list'),
-    path('adm-works/', WorkListView.as_view(), name='work-list'),
-    path('adm-projects/', ProjectListView.as_view(), name='project-list'),
+    path('adm-courses/<int:pk>/', CourseListView.as_view(), name='course-list'),
+    path('adm-works/<int:pk>/', WorkListView.as_view(), name='work-list'),
+    path('adm-projects/<int:pk>/', ProjectListView.as_view(), name='project-list'),
     path('adm-profiles/', ProfileListView.as_view(), name='profile-list'),
 ]
 
