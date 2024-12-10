@@ -39,7 +39,7 @@ const Attendance = () => {
 
     // Define the time ranges in minutes since midnight
     const morningStart = 8 * 60 + 30; // 8:30 AM
-    const morningEnd = 9 * 60 + 20; // 9:20 AM
+    const morningEnd = 9 * 60 + 50; // 9:20 AM
     const afternoonStart = 13 * 60 + 45; // 1:45 PM
     const afternoonEnd = 14 * 60 + 30; // 2:30 PM
 

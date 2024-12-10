@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 const UploadForm = ({ onSubmit, loading }) => {
   const [title, setTitle] = useState("");
+  
   const [description, setDescription] = useState("");
   const [mediaFiles, setMediaFiles] = useState([]); // For storing selected files
   const [previews, setPreviews] = useState([]); // For storing file previews
@@ -39,6 +40,7 @@ const UploadForm = ({ onSubmit, loading }) => {
       onSubmit(formData); // Pass the form data to parent
 
       // Reset the form
+      setdue_at("")
       setTitle("");
       setDescription("");
       setMediaFiles([]);

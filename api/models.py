@@ -43,6 +43,7 @@ class Project(models.Model):
     project_title = models.CharField(max_length=150, null=True)
     description = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+    due_at = models.DateTimeField(null=True)
     proof = models.FileField(upload_to='projects/', null=True)
 
    

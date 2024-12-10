@@ -41,6 +41,9 @@ const ProjectDetails = () => {
           <h2 className="project-title">Project Title: {report.project_title}</h2>
           <p className="description-label"><u>Description</u></p>
           <p className="description-text">{report.description}</p>
+          <p className="report-date">
+                {format(new Date(report.due_at), "PPP p")}
+              </p>
           {report.proof && (
             <div className="card-media">
               {report.proof.endsWith(".jpg") ||

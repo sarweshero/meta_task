@@ -93,10 +93,12 @@ body {
   border-radius: 50%;
   width: 150px;
   height: 150px;
-  object-fit: cover;
+  object-fit: cover; /* Ensures the image fills the circle without distortion */
+  object-position: top center; /* Adjust the position to focus on the face */
   margin-bottom: 20px;
   animation: zoomIn 1s ease;
 }
+
 
 /* Contact Info */
 .contact-info {

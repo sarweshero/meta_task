@@ -189,10 +189,12 @@ class ProfileView(APIView):
         profile_photo = request.FILES.get('profile_photo')  # Get the profile photo from request.FILES
 
         # Validate LinkedIn and GitHub URLs if provided
-        if linkedin_url and not self.validate_url(linkedin_url):
-            return Response({"error": "Invalid LinkedIn URL"}, status=status.HTTP_400_BAD_REQUEST)
-        if github_url and not self.validate_url(github_url):
-            return Response({"error": "Invalid GitHub URL"}, status=status.HTTP_400_BAD_REQUEST)
+        if linkedin_url != 'No information provided':
+            if linkedin_url and not self.validate_url(linkedin_url):
+                return Response({"error": "Invalid LinkedIn URL"}, status=status.HTTP_400_BAD_REQUEST)
+        if github_url != 'No information provided':
+            if github_url and not self.validate_url(github_url):
+                return Response({"error": "Invalid GitHub URL"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Create or update the profile
         profile, created = Profile.objects.update_or_create(
@@ -396,6 +398,7 @@ class ProjectView(APIView):
         username = request.data.get("username")
         project_title = request.data.get("title")
         description = request.data.get("description")
+        due_at = request.data.get("due_at")
         proof = request.FILES.get("media")
 
         if not username:
@@ -413,6 +416,7 @@ class ProjectView(APIView):
                 username=username,
                 project_title=project_title,
                 description=description,
+                due_at=due_at,
                 proof=proof,
             )
         except Exception as e:

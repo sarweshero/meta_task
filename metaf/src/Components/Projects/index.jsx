@@ -107,6 +107,9 @@ const ProjectReport = () => {
               <Link to={`/projects/${report.id}`} className="view-details-btn">
               <h4>{report.project_title}</h4>
               <p>{report.description}</p>
+              <p className="report-date">
+                {format(new Date(report.due_at), "PPP p")}
+              </p>
               </Link>
               {report.proof.endsWith(".jpg") ||
               report.proof.endsWith(".jpeg") ||
@@ -115,12 +118,12 @@ const ProjectReport = () => {
                 <img
                   src={report.proof}
                   alt="Media"
-                  style={{ width: "300px", height: "auto" }}
+                  style={{ width: "200px", height: "auto" }}
                 />
               ) : report.proof.endsWith(".mp4") ||
                 report.proof.endsWith(".mov") ||
                 report.proof.endsWith(".avi") ? (
-                <video controls style={{ width: "300px", height: "auto" }}>
+                <video controls style={{ width: "200px", height: "auto" }}>
                   <source src={report.proof} />
                   Your browser does not support the video tag.
                 </video>

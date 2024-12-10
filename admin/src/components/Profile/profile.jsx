@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { format } from 'date-fns';
 import api from "../../api";
 import "./Profile.css";
 
@@ -151,6 +152,9 @@ const Profile = () => {
                           )}
                         </div>
                       )}
+                      <p className="report-date">
+                      {format(new Date(workReport.created_at), "PPP p")}
+                      </p>
                     </li>
                   ))
                 ) : (
@@ -206,6 +210,10 @@ const Profile = () => {
                           )}
                         </div>
                       )}
+                      <p className="course-date">
+                      {format(new Date(course.uploaded_at), "PPP p")}
+                      </p>
+ 
                     </li>
                   ))
                 ) : (
@@ -227,6 +235,9 @@ const Profile = () => {
                     <li key={project.id}>
                       <strong>{project.project_title}</strong>
                       <p>{project.description}</p>
+                      <p className="course-date">
+                      {format(new Date(project.due_at), "PPP p")}
+                      </p>
                       {project.proof && (
                         <div className="card-media">
                           {project.proof.endsWith(".jpg") ||
@@ -261,6 +272,9 @@ const Profile = () => {
                           )}
                         </div>
                       )}
+                      <p className="course-date">
+                      {format(new Date(project.created_at), "PPP p")}
+                      </p>
                     </li>
                   ))
                 ) : (

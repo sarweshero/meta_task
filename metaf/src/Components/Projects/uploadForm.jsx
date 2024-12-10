@@ -5,6 +5,7 @@ const UploadForm = ({ onSubmit, loading }) => {
   const [description, setDescription] = useState("");
   const [mediaFiles, setMediaFiles] = useState([]); // For storing selected files
   const [previews, setPreviews] = useState([]); // For storing file previews
+  const [due_at, setdue_at] = useState("");
 
   const handleMediaChange = (e) => {
     const files = Array.from(e.target.files); // Convert FileList to an array
@@ -25,6 +26,7 @@ const UploadForm = ({ onSubmit, loading }) => {
       formData.append("username", localStorage.getItem("username"));
       formData.append("title", title);
       formData.append("description", description);
+      formData.append("due_at", due_at);
 
       // Append all media files to FormData
       mediaFiles.forEach((file) => formData.append("media", file));
@@ -33,6 +35,7 @@ const UploadForm = ({ onSubmit, loading }) => {
 
       // Reset the form
       setTitle("");
+      setdue_at("");
       setDescription("");
       setMediaFiles([]);
       setPreviews([]);
@@ -48,10 +51,20 @@ const UploadForm = ({ onSubmit, loading }) => {
         onChange={(e) => setTitle(e.target.value)}
         required
       />
+      
       <textarea
         placeholder="Enter Project Description"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
+        required
+      />
+      <label htmlFor="due_at">Due Date:</label>
+      <input
+        type="date"
+        name="due_at"
+        placeholder="Due-Date"
+        value={due_at}
+        onChange={(e) => setdue_at(e.target.value)}
         required
       />
       <input
