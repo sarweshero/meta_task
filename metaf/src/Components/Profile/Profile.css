@@ -142,6 +142,46 @@ button + button {
   margin-left: 10px;
 }
 
+/* Dropdown Styles */
+.profile-section-card select {
+  background-color: #333;
+  color: #fff;
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #555;
+  border-radius: 5px;
+  font-size: 1em;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+  cursor: pointer;
+}
+
+/* Hover effect on dropdown */
+.profile-section-card select:hover {
+  border-color: #0072ff;
+  background-color: #444;
+}
+
+/* Focus effect */
+.profile-section-card select:focus {
+  outline: none;
+  border-color: #007bff;
+  background-color: #444;
+}
+
+/* Option Styles */
+.profile-section-card select option {
+  color: #fff;
+  padding: 12px;
+  font-size: 1em;
+}
+
+.profile-section-card select option:hover {
+  background-color: #0072ff;
+  color: #fff;
+}
+
+
 /* Success and Error Messages */
 .success-message {
   color: #28a745;

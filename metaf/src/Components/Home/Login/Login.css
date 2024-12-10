@@ -52,7 +52,7 @@ body {
   }
   
   .login-card input[type="text"]:focus{
-    border-color: #053c76 !important;
+    border-color: ##007bff !important;
   }
  
   /* Button Styles */

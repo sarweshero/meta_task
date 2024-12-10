@@ -205,3 +205,8 @@ body {
     cursor: not-allowed;
     box-shadow: none;
 }
+
+.domain-group h2{
+    color: #00c6ff;
+}
+

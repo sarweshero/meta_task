@@ -21,6 +21,14 @@ const Profile = () => {
   const username = localStorage.getItem("username");
   const authToken = localStorage.getItem("access");
 
+  const domains = [
+    "FullStack",
+    "Cyber Security",
+    "AI&ML",
+    "IOT",
+    "AR/VR" 
+  ];
+
   const fetchUserData = async () => {
     try {
       setIsLoading(true);
@@ -38,7 +46,6 @@ const Profile = () => {
         profile_photo: response.data.profile_photo,
       });
 
-      // Store profile photo in localStorage if available
       if (response.data.profile_photo) {
         localStorage.setItem("profile_photo", response.data.profile_photo);
       }
@@ -65,16 +72,14 @@ const Profile = () => {
     if (file) {
       setUserData({
         ...userData,
-        profile_photo: file, // Store the file for submission
+        profile_photo: file,
       });
-      // Also update profile photo in localStorage
       localStorage.setItem("profile_photo", URL.createObjectURL(file));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setError("");
 
     try {
@@ -88,11 +93,9 @@ const Profile = () => {
       formData.append("github_url", userData.github_url);
       formData.append("about", userData.about);
 
-      // Only append the profile_photo if it's changed
       if (userData.profile_photo instanceof File) {
         formData.append("profile_photo", userData.profile_photo);
       } else {
-        // If no new profile photo, send the photo from localStorage
         const storedProfilePhoto = localStorage.getItem("profile_photo");
         if (storedProfilePhoto) {
           formData.append("profile_photo", storedProfilePhoto);
@@ -102,7 +105,7 @@ const Profile = () => {
       const response = await api.post(`profile/`, formData, {
         headers: {
           Authorization: `Bearer ${authToken}`,
-          "Content-Type": "multipart/form-data",  // Ensure content type is set correctly
+          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -122,7 +125,6 @@ const Profile = () => {
         {error && <div className="error-message">{error}</div>}
 
         <div className="profile-section-card">
-          {/* Profile photo */}
           <img
             src={
               userData.profile_photo
@@ -134,121 +136,69 @@ const Profile = () => {
             alt="Profile"
             className="profile-picture"
           />
-          {isEditing && (
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-          )}
+          {isEditing && <input type="file" accept="image/*" onChange={handleFileChange} />}
 
-          {/* Name */}
           {isEditing ? (
-            <input
-              type="text"
-              name="name"
-              value={userData.name}
-              onChange={handleChange}
-              placeholder="Name"
-            />
+            <input type="text" name="name" value={userData.name} onChange={handleChange} placeholder="Name" />
           ) : (
             <h2>{userData.name}</h2>
           )}
 
-          {/* Domain */}
           {isEditing ? (
-            <input
-              type="text"
-              name="domain"
-              value={userData.domain}
-              onChange={handleChange}
-              placeholder="Domain"
-            />
+            <select name="domain" value={userData.domain} onChange={handleChange}>
+              <option value="">Select Domain</option>
+              {domains.map((domain, index) => (
+                <option key={index} value={domain}>
+                  {domain}
+                </option>
+              ))}
+            </select>
           ) : (
             <p>{userData.domain}</p>
           )}
 
-          {/* Phone */}
           {isEditing ? (
-            <input
-              type="text"
-              name="phone_no"
-              value={userData.phone_no}
-              onChange={handleChange}
-              placeholder="Phone"
-            />
+            <input type="text" name="phone_no" value={userData.phone_no} onChange={handleChange} placeholder="Phone" />
           ) : (
             <p><strong>Phone:</strong> {userData.phone_no}</p>
           )}
 
-          {/* Email */}
           {isEditing ? (
-            <input
-              type="text"
-              name="mail_id"
-              value={userData.mail_id}
-              onChange={handleChange}
-              placeholder="Email"
-            />
+            <input type="text" name="mail_id" value={userData.mail_id} onChange={handleChange} placeholder="Email" />
           ) : (
             <p><strong>Email:</strong> <a href={`mailto:${userData.mail_id}`}>{userData.mail_id}</a></p>
           )}
 
-          {/* LinkedIn */}
           {isEditing ? (
-            <input
-              type="text"
-              name="linkedin_url"
-              value={userData.linkedin_url}
-              onChange={handleChange}
-              placeholder="LinkedIn"
-            />
+            <input type="text" name="linkedin_url" value={userData.linkedin_url} onChange={handleChange} placeholder="LinkedIn" />
           ) : (
-            <p><strong>LinkedIn:</strong> <a href={userData.linkedin_url} target="_blank">{userData.linkedin_url}</a></p>
+            <p><strong>LinkedIn:</strong> <a href={userData.linkedin_url} target="_blank" rel="noopener noreferrer">{userData.linkedin_url}</a></p>
           )}
 
-          {/* GitHub */}
           {isEditing ? (
-            <input
-              type="text"
-              name="github_url"
-              value={userData.github_url}
-              onChange={handleChange}
-              placeholder="GitHub"
-            />
+            <input type="text" name="github_url" value={userData.github_url} onChange={handleChange} placeholder="GitHub" />
           ) : (
-            <p><strong>GitHub:</strong> <a href={userData.github_url} target="_blank">{userData.github_url}</a></p>
+            <p><strong>GitHub:</strong> <a href={userData.github_url} target="_blank" rel="noopener noreferrer">{userData.github_url}</a></p>
           )}
 
-          {/* About Section */}
           <div className="about-section">
             <strong>About:</strong>
             {isEditing ? (
-              <textarea
-                name="about"
-                value={userData.about}
-                onChange={handleChange}
-                placeholder="Tell us something about yourself"
-              />
+              <textarea name="about" value={userData.about} onChange={handleChange} placeholder="Tell us something about yourself" />
             ) : (
               <p>{userData.about}</p>
             )}
           </div>
 
-          {/* Edit and Save/Cancel Buttons */}
           <button onClick={() => setIsEditing(!isEditing)}>
             {isEditing ? "Cancel" : "Edit"}
           </button>
-          {isEditing && (
-            <button onClick={handleSubmit}>
-              Update
-            </button>
-          )}
+          {isEditing && <button onClick={handleSubmit}>Update</button>}
         </div>
       </div>
       <footer className="footer">
-            <p>Created by <strong><span1>Muneeswaran </span1>& <span2>Sarweshwar...!</span2></strong></p>
-          </footer>
+        <p>Created by <strong><span1>Muneeswaran </span1>& <span2>Sarweshwar...!</span2></strong></p>
+      </footer>
     </div>
   );
 };

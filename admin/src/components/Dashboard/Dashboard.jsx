@@ -58,10 +58,26 @@ const Dashboard = () => {
   const navigateToAttendance = () => {
     navigate("/attendance");
   };
-  // Navigate to Profile page
-  const navigateToProfile = () => {
-    navigate("/profile");
+
+  // Group members by domain and sort by name
+  const groupByDomain = (members) => {
+    const sortedMembers = members
+      .sort((a, b) => a.name.localeCompare(b.name)) // Sort by name in ascending order
+      .reduce((acc, member) => {
+        // Group members by domain
+        const domain = member.expertise || "Unknown";
+        if (!acc[domain]) {
+          acc[domain] = [];
+        }
+        acc[domain].push(member);
+        return acc;
+      }, {});
+
+    return sortedMembers;
   };
+
+  // Group members and sort
+  const groupedMembers = groupByDomain(members);
 
   return (
     <div className="dashboard-container">
@@ -79,65 +95,69 @@ const Dashboard = () => {
         {isLoading ? (
           <div className="loading">Loading...</div>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Reg_No</th>
-                <th>Profile</th>
-                <th>Name</th>
-                <th>Domain</th>
-                <th>LinkedIn</th>
-                <th>GitHub</th>
-                <th>Projects Completed</th>
-                <th>Courses Completed</th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((member) => (
-                <tr key={member.id}>
-                  <td>{member.username}</td>
-                  <td>
-                    <img
-                      src={member.profile_picture}
-                      alt="Profile"
-                      className="profile-img"
-                    />
-                  </td>
-                  <td>
-                    <a
-                      href={`/profile/${member.username}`}  // Pass member ID in the URL
-                      target="_parent"
-                      rel="noopener noreferrer"
-                    >
-                      {member.name}
-                    </a>
-                  </td>
-
-                  <td>{member.expertise}</td>
-                  <td>
-                    <a
-                      href={member.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      LinkedIn
-                    </a>
-                  </td>
-                  <td>
-                    <a
-                      href={member.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      GitHub
-                    </a>
-                  </td>
-                  <td>{member.project_count}</td>
-                  <td>{member.courses_completed}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          Object.keys(groupedMembers).map((domain) => (
+            <div key={domain} className="domain-group">
+              <h2><strong>{domain}</strong></h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Reg_No</th>
+                    <th>Profile</th>
+                    <th>Name</th>
+                    <th>Domain</th>
+                    <th>LinkedIn</th>
+                    <th>GitHub</th>
+                    <th>Projects Completed</th>
+                    <th>Courses Completed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {groupedMembers[domain].map((member) => (
+                    <tr key={member.id}>
+                      <td>{member.username}</td>
+                      <td>
+                        <img
+                          src={member.profile_picture}
+                          alt="Profile"
+                          className="profile-img"
+                        />
+                      </td>
+                      <td>
+                        <a
+                          href={`/profile/${member.username}`} // Pass member ID in the URL
+                          target="_parent"
+                          rel="noopener noreferrer"
+                        >
+                          {member.name}
+                        </a>
+                      </td>
+                      <td>{member.expertise}</td>
+                      <td>
+                        <a
+                          href={member.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          LinkedIn
+                        </a>
+                      </td>
+                      <td>
+                        <a
+                          href={member.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          GitHub
+                        </a>
+                      </td>
+                      <td>{member.project_count}</td>
+                      <td>{member.courses_completed}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))
         )}
       </div>
 
