@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { format } from 'date-fns';
+import { format } from "date-fns";
 import api from "../../api";
 import "./Profile.css";
+
 
 const authToken = localStorage.getItem("access");
 
@@ -19,6 +20,9 @@ const Profile = () => {
   const [showWorkReports, setShowWorkReports] = useState(false);
   const [showCourses, setShowCourses] = useState(false);
   const [showProjects, setShowProjects] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [newProject, setNewProject] = useState({ title: "", description: "", due_at: "" });
+
 
   const fetchMemberData = async () => {
     if (!username) {
@@ -58,6 +62,26 @@ const Profile = () => {
     }
   };
 
+  const handleAssignProject = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await api.post(
+        `/adm-projects/${member.user}/`,
+        { ...newProject },
+        {
+          headers: { Authorization: `Bearer ${authToken}` },
+        }
+      );
+
+      setProjects((prevProjects) => [...prevProjects, response.data]); // Update projects list
+      setShowAssignModal(false); // Close modal
+      setNewProject({ title: "", description: "", due_at: "" }); // Reset form
+    } catch (error) {
+      console.error("Error assigning project:", error);
+    }
+  };
+
+
   useEffect(() => {
     if (username) {
       fetchMemberData();
@@ -72,7 +96,6 @@ const Profile = () => {
       {loading && <p>Loading...</p>}
       {error && <p className="error-message">{error}</p>}
 
-
       {showProfile && member && !loading && (
         <>
           <h2>{member.name}'s Profile</h2>
@@ -81,7 +104,7 @@ const Profile = () => {
               if (window.history.length > 1) {
                 navigate(-1); // Go back to the previous page
               } else {
-                navigate("/dashboard"); // Navigate to the home page if there's no history
+                navigate("/dashboard"); // Navigate to the dashboard if no history
               }
             }}
           >
@@ -93,23 +116,50 @@ const Profile = () => {
               alt="Profile"
               className="profile-img"
             />
-            <p><strong>Domain:</strong> {member.domain}</p>
-            <p><strong>E-Mail:</strong> {member.mail_id}</p>
-            <p><strong>Phone-No:</strong> {member.phone_no}</p>
+            <p>
+              <strong>Domain:</strong> {member.domain}
+            </p>
+            <p>
+              <strong>E-Mail:</strong> {member.mail_id}
+            </p>
+            <p>
+              <strong>Phone-No:</strong> {member.phone_no}
+            </p>
             <p>
               <strong>LinkedIn:</strong>{" "}
-              <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+              <a
+                href={member.linkedin_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                LinkedIn
+              </a>
             </p>
             <p>
               <strong>GitHub:</strong>{" "}
-              <a href={member.github_url} target="_blank" rel="noopener noreferrer">GitHub</a>
+              <a
+                href={member.github_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                GitHub
+              </a>
             </p>
           </div>
 
           {/* Work Reports Section */}
           <div className="section">
-            <h3 onClick={() => setShowWorkReports((prevState) => !prevState)}>
-              Work Reports {showWorkReports ? "▲" : "▼"}
+            <h3>
+              Work Reports
+              <button 
+                onClick={() => {
+                  setShowWorkReports((prevState) => !prevState);
+                  navigate("/Workreport");  // Change this to your desired path
+                }}
+                className="wrk-btn"
+              >
+                {showWorkReports ? "Hide" : "View"}
+              </button>
             </h3>
             {showWorkReports && (
               <ul>
@@ -153,7 +203,7 @@ const Profile = () => {
                         </div>
                       )}
                       <p className="report-date">
-                      {format(new Date(workReport.created_at), "PPP p")}
+                        {format(new Date(workReport.created_at), "PPP p")}
                       </p>
                     </li>
                   ))
@@ -166,8 +216,17 @@ const Profile = () => {
 
           {/* Courses Completed Section */}
           <div className="section">
-            <h3 onClick={() => setShowCourses((prevState) => !prevState)}>
-              Courses Completed {showCourses ? "▲" : "▼"}
+            <h3>
+              Courses Completed
+              <button
+               onClick={() => {
+                setShowCourses((prevState) => !prevState);
+                navigate("/Course");  // Change this to your desired path
+              }}
+              className="toggle-btn"
+              >
+                {showCourses ? "Hide" : "View"}
+              </button>
             </h3>
             {showCourses && (
               <ul>
@@ -178,42 +237,16 @@ const Profile = () => {
                       <p>{course.platform}</p>
                       {course.certificate && (
                         <div className="card-media">
-                          {course.certificate.endsWith(".jpg") ||
-                          course.certificate.endsWith(".jpeg") ||
-                          course.certificate.endsWith(".png") ||
-                          course.certificate.endsWith(".gif") ? (
-                            <img
-                              src={course.certificate}
-                              alt="Media"
-                              style={{ width: "100px", height: "auto" }}
-                            />
-                          ) : course.certificate.endsWith(".mp4") ||
-                            course.certificate.endsWith(".mov") ||
-                            course.certificate.endsWith(".avi") ? (
-                            <video controls style={{ width: "240px", height: "200px" }}>
-                              <source src={course.certificate} />
-                              Your browser does not support the video tag.
-                            </video>
-                          ) : (
-                            <a
-                              href={course.certificate}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                textDecoration: "none",
-                                color: "#007bff",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              View File
-                            </a>
-                          )}
+                          <img
+                            src={course.certificate}
+                            alt="Certificate"
+                            style={{ width: "100px", height: "auto" }}
+                          />
                         </div>
                       )}
                       <p className="course-date">
-                      {format(new Date(course.uploaded_at), "PPP p")}
+                        {format(new Date(course.uploaded_at), "PPP p")}
                       </p>
- 
                     </li>
                   ))
                 ) : (
@@ -225,8 +258,25 @@ const Profile = () => {
 
           {/* Projects Completed Section */}
           <div className="section">
-            <h3 onClick={() => setShowProjects((prevState) => !prevState)}>
-              Projects Completed {showProjects ? "▲" : "▼"}
+            <h3>
+              Projects Completed
+              <button
+                 onClick={() => {
+                  setShowProjects((prevState) => !prevState);
+                  navigate("/Project");  // Change this to your desired path
+                }}
+                className="prjct-btn"
+                >
+                {showProjects ? "Hide" : "View"}
+              </button>
+                
+              <button
+                onClick={() => setShowAssignModal(true)} // Open modal
+                className="assign-btn"
+              >
+                Assign Project
+              </button>
+
             </h3>
             {showProjects && (
               <ul>
@@ -236,44 +286,7 @@ const Profile = () => {
                       <strong>{project.project_title}</strong>
                       <p>{project.description}</p>
                       <p className="course-date">
-                      {format(new Date(project.due_at), "PPP p")}
-                      </p>
-                      {project.proof && (
-                        <div className="card-media">
-                          {project.proof.endsWith(".jpg") ||
-                          project.proof.endsWith(".jpeg") ||
-                          project.proof.endsWith(".png") ||
-                          project.proof.endsWith(".gif") ? (
-                            <img
-                              src={project.proof}
-                              alt="Media"
-                              style={{ width: "100px", height: "auto" }}
-                            />
-                          ) : project.proof.endsWith(".mp4") ||
-                            project.proof.endsWith(".mov") ||
-                            project.proof.endsWith(".avi") ? (
-                            <video controls style={{ width: "240px", height: "200px" }}>
-                              <source src={project.proof} />
-                              Your browser does not support the video tag.
-                            </video>
-                          ) : (
-                            <a
-                              href={project.proof}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                textDecoration: "none",
-                                color: "#007bff",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              View File
-                            </a>
-                          )}
-                        </div>
-                      )}
-                      <p className="course-date">
-                      {format(new Date(project.created_at), "PPP p")}
+                        {format(new Date(project.due_at), "PPP p")}
                       </p>
                     </li>
                   ))
@@ -281,6 +294,68 @@ const Profile = () => {
                   <p>No projects found</p>
                 )}
               </ul>
+            )}
+
+             {/* Modal for Assigning Projects */}
+             {showAssignModal && (
+              <div className="modal">
+                <div className="modal-content">
+                  <h4>Assign a New Project</h4>
+                  <form onSubmit={handleAssignProject}>
+                    <label>
+                      Project Title:
+                      <input
+                        type="text"
+                        value={newProject.title}
+                        onChange={(e) =>
+                          setNewProject((prev) => ({
+                            ...prev,
+                            title: e.target.value,
+                          }))
+                        }
+                        required
+                      />
+                    </label>
+                    <label>
+                      Description:
+                      <textarea
+                        value={newProject.description}
+                        onChange={(e) =>
+                          setNewProject((prev) => ({
+                            ...prev,
+                            description: e.target.value,
+                          }))
+                        }
+                        required
+                      ></textarea>
+                    </label>
+                    <label>
+                      Due Date:
+                      <input
+                        type="date"
+                        value={newProject.due_at}
+                        onChange={(e) =>
+                          setNewProject((prev) => ({
+                            ...prev,
+                            due_at: e.target.value,
+                          }))
+                        }
+                        required
+                      />
+                    </label>
+                    <button type="submit" className="save-btn">
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      className="cancel-btn"
+                      onClick={() => setShowAssignModal(false)}
+                    >
+                      Cancel
+                    </button>
+                  </form>
+                </div>
+              </div>
             )}
           </div>
         </>

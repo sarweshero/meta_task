@@ -6,7 +6,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./components/NotFound";
 import Profile from "./components/Profile/profile"
 import Attendance from "./components/Attendance/Attendance";
-
+import ProjectPage from "./page/Project/Project";
+import CoursesPage from './page/Course/Course';
+import WorkReport from "./page/Workreport/Workreport";
 function App() {
 
 
@@ -43,6 +45,11 @@ function App() {
             </ProtectedRoute>
           } 
         />
+        <Route path="/" element={<Profile />} />
+        <Route path="/Project" element={<ProjectPage />} /> 
+        <Route path="/courses" element={<CoursesPage />} />
+        <Route path="/Workreport" element={<CoursesPage />} />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
