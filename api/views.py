@@ -1,12 +1,13 @@
+
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import make_aware
 from datetime import datetime
-from rest_framework import generics, status
+from rest_framework import generics, status, serializers
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
@@ -120,22 +121,67 @@ class StatisticsView(APIView):
 
         return Response(response_data)
 
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-        user = self.user
+# Student login view using TokenAuthentication
+class StudentLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
 
-        # Check if the user is a staff user
-        if not user.is_staff:
-            raise serializers.ValidationError("Only staff users can log in.")
-
-        # Include any additional data you want to return
-        data["username"] = user.username
+    def validate(self, data):
+        username = data.get('username')
+        password = data.get('password')
+        user = authenticate(username=username, password=password)
+        if user is None or user.is_staff:
+            raise serializers.ValidationError("Invalid credentials or not a student user.")
+        data['user'] = user
         return data
 
+class StudentLoginView(ObtainAuthToken):
+    serializer_class = StudentLoginSerializer
+    permission_classes = [AllowAny]
 
-class CustomTokenObtainPairView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'username': user.username,
+            'is_staff': user.is_staff,
+        })
+    
+# Admin login view using TokenAuthentication
+from rest_framework import serializers
+from rest_framework.permissions import AllowAny
+from django.contrib.auth import authenticate
+
+class AdminLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate(self, data):
+        username = data.get('username')
+        password = data.get('password')
+        user = authenticate(username=username, password=password)
+        if user is None or not user.is_staff:
+            raise serializers.ValidationError("Invalid credentials or not an admin user.")
+        data['user'] = user
+        return data
+
+class AdminLoginView(ObtainAuthToken):
+    serializer_class = AdminLoginSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'username': user.username,
+            'is_staff': user.is_staff,
+        })
 
         
 
