@@ -1,12 +1,13 @@
+
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import make_aware
 from datetime import datetime
-from rest_framework import generics, status
+from rest_framework import generics, status, serializers
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
@@ -120,22 +121,131 @@ class StatisticsView(APIView):
 
         return Response(response_data)
 
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-        user = self.user
+# Student login view using TokenAuthentication
+class StudentLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
 
-        # Check if the user is a staff user
-        if not user.is_staff:
-            raise serializers.ValidationError("Only staff users can log in.")
-
-        # Include any additional data you want to return
-        data["username"] = user.username
+    def validate(self, data):
+        username = data.get('username')
+        password = data.get('password')
+        user = authenticate(username=username, password=password)
+        if user is None or user.is_staff:
+            raise serializers.ValidationError("Invalid credentials or not a student user.")
+        data['user'] = user
         return data
 
+class StudentLoginView(ObtainAuthToken):
+    serializer_class = StudentLoginSerializer
+    permission_classes = [AllowAny]
 
-class CustomTokenObtainPairView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'username': user.username,
+            'is_staff': user.is_staff,
+        })
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
+from django.contrib.auth.models import User
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+class GoogleOAuthView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        token = request.data.get("id_token")
+        if not token:
+            return Response({"error": "No token provided"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            # Specify the CLIENT_ID of the app that accesses the backend:
+            CLIENT_ID = "252046024868-6utan5j5p66sctivhpcpnasc4etjiucv.apps.googleusercontent.com"
+            idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), CLIENT_ID)
+
+            email = idinfo["email"]
+            first_name = idinfo.get("given_name", "")
+            last_name = idinfo.get("family_name", "")
+            username = email.split("@")[0]
+            google_profile_photo = idinfo.get("picture")
+
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={
+                    "username": username,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                },
+            )
+            # Redirect to registration page if user is not signed up
+            if created:
+                return Response({"redirect": "http://localhost:3000/register"}, status=status.HTTP_302_FOUND)
+
+            # Optionally, update names if changed
+            if not created:
+                user.first_name = first_name
+                user.last_name = last_name
+                user.save()
+
+            # Get or create the profile for the user
+            profile, _ = Profile.objects.get_or_create(user=user)
+            if google_profile_photo:
+                profile.profile_photo_url = google_profile_photo  # Assuming you have this field
+                profile.save()
+
+            # Issue token (using DRF authtoken)
+            from rest_framework.authtoken.models import Token
+            token_obj, _ = Token.objects.get_or_create(user=user)
+
+            # Include profile photo and username in the response
+            profile_photo_url = request.build_absolute_uri(profile.profile_photo.url) if profile.profile_photo else None
+            return Response({
+                "token": token_obj.key,
+                "username": user.username,
+                "email": user.email,
+                "profile_photo": google_profile_photo or None
+            })
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+# Admin login view using TokenAuthentication
+from rest_framework import serializers
+from rest_framework.permissions import AllowAny
+from django.contrib.auth import authenticate
+
+class AdminLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate(self, data):
+        username = data.get('username')
+        password = data.get('password')
+        user = authenticate(username=username, password=password)
+        if user is None or not user.is_staff:
+            raise serializers.ValidationError("Invalid credentials or not an admin user.")
+        data['user'] = user
+        return data
+
+class AdminLoginView(ObtainAuthToken):
+    serializer_class = AdminLoginSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'username': user.username,
+            'is_staff': user.is_staff,
+        })
 
         
 
