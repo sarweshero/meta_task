@@ -1,28 +1,31 @@
 import os
-import requests as py_requests
+import re
 import secrets
+import requests as py_requests
+from datetime import datetime
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import make_aware
-from datetime import datetime
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 from rest_framework import generics, status, serializers
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
-from django.contrib.auth.models import User
-from django.core.validators import URLValidator
-from django.core.exceptions import ValidationError
+from django.contrib.auth import authenticate
 from .models import *
 from .serializers import *
-import re
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 
+# --- User Approval Views ---
 class InactiveUserApprovalView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # List all users with is_active=False
         inactive_users = User.objects.filter(is_active=False)
         users_data = [
             {
@@ -37,7 +40,6 @@ class InactiveUserApprovalView(APIView):
         return Response(users_data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        # Approve a user by setting is_active=True
         user_id = request.data.get("user_id")
         if not user_id:
             return Response({"error": "user_id is required"}, status=status.HTTP_400_BAD_REQUEST)
