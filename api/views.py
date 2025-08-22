@@ -1,3 +1,52 @@
+# Google OAuth for registration: fetch user info, do not save
+import os
+import requests as py_requests
+import secrets
+
+class GoogleOAuthRegisterView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        token = request.data.get("id_token")
+        if not token:
+            return Response({"error": "No token provided"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+            idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), CLIENT_ID)
+
+            email = idinfo.get("email", "")
+            first_name = idinfo.get("given_name", "")
+            last_name = idinfo.get("family_name", "")
+            name = idinfo.get("name", "")
+            picture = idinfo.get("picture", "")
+            # Google does not provide DOB by default; try to fetch from Google People API if access_token is provided
+            dob = None
+            access_token = request.data.get("access_token")
+            if access_token:
+                people_api_url = "https://people.googleapis.com/v1/people/me?personFields=birthdays"
+                headers = {"Authorization": f"Bearer {access_token}"}
+                resp = py_requests.get(people_api_url, headers=headers)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    birthdays = data.get("birthdays", [])
+                    if birthdays:
+                        date = birthdays[0].get("date", {})
+                        dob = f"{date.get('year', '')}-{date.get('month', ''):02}-{date.get('day', ''):02}"
+
+            # Password is not available from Google, so generate a random one or leave blank
+            password = secrets.token_urlsafe(12)
+
+            return Response({
+                "email": email,
+                "first_name": first_name,
+                "last_name": last_name,
+                "name": name,
+                "profile_photo": picture,
+                "date_of_birth": dob,
+                "password": password
+            })
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import make_aware
@@ -118,7 +167,6 @@ class StatisticsView(APIView):
             "total_projects": total_projects,
             "individual_counts": user_data,
         }
-
         return Response(response_data)
 
 # Student login view using TokenAuthentication
@@ -166,7 +214,7 @@ class GoogleOAuthView(APIView):
             return Response({"error": "No token provided"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             # Specify the CLIENT_ID of the app that accesses the backend:
-            CLIENT_ID = "252046024868-6utan5j5p66sctivhpcpnasc4etjiucv.apps.googleusercontent.com"
+            CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
             idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), CLIENT_ID)
 
             email = idinfo["email"]

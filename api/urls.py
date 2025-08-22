@@ -21,6 +21,7 @@ urlpatterns = [
     path('adm-works/<int:pk>/', WorkListView.as_view(), name='work-list'),
     path('adm-projects/<int:pk>/', ProjectListView.as_view(), name='project-list'),
     path('adm-profiles/', ProfileListView.as_view(), name='profile-list'),
+
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
