@@ -7,13 +7,16 @@ class UserSerializer(serializers.ModelSerializer):
         # Include all fields except `last_login` and `is_superuser`
         fields = [
             "id", "username", "password", "first_name", "last_name", 
-            "email", "is_staff"
+            "email", "is_staff", "is_active"
         ]
         extra_kwargs = {
             "password": {"write_only": True},
+            "is_active": {"default": False},  # Set `is_active` to False by default
         }
 
     def create(self, validated_data):
+        # Set `is_active` to 0 (False) by default
+        validated_data["is_active"] = False
         # Use `create_user` to handle password hashing
         user = User.objects.create_user(**validated_data)
         return user

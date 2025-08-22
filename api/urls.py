@@ -1,6 +1,7 @@
 
 from django.urls import path
-from .views import*
+from .views import *
+from .views import InactiveUserApprovalView
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -21,6 +22,7 @@ urlpatterns = [
     path('adm-works/<int:pk>/', WorkListView.as_view(), name='work-list'),
     path('adm-projects/<int:pk>/', ProjectListView.as_view(), name='project-list'),
     path('adm-profiles/', ProfileListView.as_view(), name='profile-list'),
+    path('users/inactive/', InactiveUserApprovalView.as_view(), name='inactive-user-approval'),
 
 ]
 

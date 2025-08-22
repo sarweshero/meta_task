@@ -1,7 +1,64 @@
-# Google OAuth for registration: fetch user info, do not save
 import os
 import requests as py_requests
 import secrets
+from django.shortcuts import get_object_or_404
+from django.utils.timezone import make_aware
+from datetime import datetime
+from rest_framework import generics, status, serializers
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import User
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
+from .models import *
+from .serializers import *
+import re
+
+
+class InactiveUserApprovalView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # List all users with is_active=False
+        inactive_users = User.objects.filter(is_active=False)
+        users_data = [
+            {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+            }
+            for user in inactive_users
+        ]
+        return Response(users_data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        # Approve a user by setting is_active=True
+        user_id = request.data.get("user_id")
+        if not user_id:
+            return Response({"error": "user_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(id=user_id, is_active=False)
+            user.is_active = True
+            user.save()
+            return Response({"message": f"User {user.username} approved."}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({"error": "User not found or already active."}, status=status.HTTP_404_NOT_FOUND)
+# Google OAuth for registration: fetch user info, do not save
+class StudentRegistrationView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({"user": UserSerializer(user).data}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class GoogleOAuthRegisterView(APIView):
     permission_classes = []
@@ -48,21 +105,6 @@ class GoogleOAuthRegisterView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-from django.shortcuts import get_object_or_404
-from django.utils.timezone import make_aware
-from datetime import datetime
-from rest_framework import generics, status, serializers
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
-from django.contrib.auth.models import User
-from django.core.validators import URLValidator
-from django.core.exceptions import ValidationError
-from .models import *
-from .serializers import *
-import re
 
 # Regex pattern for validating URLs (LinkedIn and GitHub)
 URL_REGEX = re.compile(r"^(https?:\/\/)?([\w\d-]+\.)+[\w]{2,}(\/.+)*\/?$")
